@@ -349,7 +349,7 @@
       "Z": 204.88434
     }
   },
-  "EsquiesNest": {
+  "EsquieNest": {
     "Chest_EsquiesNest_1": {
       "X": -424.53668,
       "Y": -866.3015,
@@ -1209,7 +1209,7 @@
       "Z": 10207.33
     }
   },
-  "GrandisStation": {
+  "MonocoStation": {
     "Chest_GrandisStation_1": {
       "X": 2291.0134,
       "Y": 14138.476,
@@ -1295,7 +1295,7 @@
       "Z": 103.33792
     }
   },
-  "Monolith": {
+  "Monolith_Interior_Climb": {
     "Chest_Monolith_1": {
       "X": -14020.0,
       "Y": -47810.0,
@@ -1801,6 +1801,11 @@
     }
   },
   "SeaCliff": {
+    "Chest_SeaCliff_1": {
+      "X": -28060.0,
+      "Y": 1885.0,
+      "Z": -2199.73
+    },
     "Chest_SeaCliff_2": {
       "X": -28060.0,
       "Y": 1885.0,

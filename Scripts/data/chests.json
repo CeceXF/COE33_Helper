@@ -2947,5 +2947,162 @@
       "Y": -9638.285,
       "Z": 119.52332
     }
+  },
+  "SideLevel_VersosDraft": {
+    "Chest_SideLevel_VersosDraft_5": {
+      "X": -2526.1301,
+      "Y": 53930.426,
+      "Z": 13095.993
+    },
+    "Chest_SideLevel_VersosDraft_25": {
+        "X": 1393.2358,
+        "Y": 66656.35,
+        "Z": 14372.554
+      },
+    "Chest_SideLevel_VersosDraft_26": {
+        "X": -6166.42,
+        "Y": 66702.91,
+        "Z": 13103.896
+      },
+    "Chest_SideLevel_VersosDraft_15": {
+        "X": -2281.1152,
+        "Y": 76611.23,
+        "Z": 16198.39
+      },
+    "Chest_SideLevel_VersosDraft_1": {
+        "X": 3463.3328,
+        "Y": 65452.52,
+        "Z": 13119.907
+      },
+    "Chest_SideLevel_VersosDraft_28": {
+        "X": -6094.0376,
+        "Y": 60449.19,
+        "Z": 13123.718
+      },
+    "Chest_SideLevel_VersosDraft_10": {
+        "X": 6596.5293,
+        "Y": 83570.28,
+        "Z": 18306.062
+      },
+    "Chest_SideLevel_VersosDraft_13": {
+        "X": 10745.937,
+        "Y": 75731.734,
+        "Z": 17561.287
+      },
+    "Chest_SideLevel_VersosDraft_22": {
+        "X": -7818.179,
+        "Y": 73536.82,
+        "Z": 9088.673
+      },
+    "Chest_SideLevel_VersosDraft_14": {
+        "X": 5388.9097,
+        "Y": 70731.83,
+        "Z": 15018.243
+      },
+    "Chest_SideLevel_VersosDraft_3": {
+        "X": 14531.301,
+        "Y": 81038.75,
+        "Z": 17618.564
+      },
+    "Chest_SideLevel_VersosDraft_29": {
+        "X": -9999.239,
+        "Y": 78887.36,
+        "Z": 15498.76
+      },
+    "Chest_SideLevel_VersosDraft_35": {
+        "X": -9862.435,
+        "Y": 63085.68,
+        "Z": 13101.116
+      },
+    "Chest_SideLevel_VersosDraft_4": {
+        "X": 13036.805,
+        "Y": 77333.13,
+        "Z": 17335.164
+      },
+    "Chest_SideLevel_VersosDraft_16": {
+        "X": 14857.867,
+        "Y": 61904.49,
+        "Z": 13961.511
+      },
+    "Chest_SideLevel_VersosDraft_17": {
+        "X": 13951.043,
+        "Y": 57521.87,
+        "Z": 14136.701
+      },
+    "Chest_SideLevel_VersosDraft_6": {
+        "X": 15780.784,
+        "Y": 69518.695,
+        "Z": 17646.34
+      },
+    "Chest_SideLevel_VersosDraft_7": {
+        "X": 18577.656,
+        "Y": 69796.08,
+        "Z": 18050.379
+      },
+    "Chest_SideLevel_VersosDraft_9": {
+        "X": 21145.31,
+        "Y": 67398.7,
+        "Z": 15798.08
+      },
+    "Chest_SideLevel_VersosDraft_11": {
+        "X": 20134.158,
+        "Y": 72261.375,
+        "Z": 15941.145
+      },
+    "Chest_SideLevel_VersosDraft_12": {
+        "X": 13444.387,
+        "Y": 70908.914,
+        "Z": 15471.028
+      },
+    "Chest_SideLevel_VersosDraft_27": {
+        "X": -20889.666,
+        "Y": 80377.43,
+        "Z": 17463.938
+      },
+    "Chest_SideLevel_VersosDraft_2": {
+        "X": 15886.962,
+        "Y": 76222.74,
+        "Z": 16463.41
+      },
+    "Chest_SideLevel_VersosDraft_24": {
+        "X": -12951.43,
+        "Y": 64729.703,
+        "Z": 14528.22
+      },
+    "Chest_SideLevel_VersosDraft_23": {
+        "X": -17216.027,
+        "Y": 63898.332,
+        "Z": 13095.194
+      },
+    "Chest_SideLevel_VersosDraft_30": {
+        "X": -12999.335,
+        "Y": 76849.76,
+        "Z": 15128.996
+      },
+    "Chest_SideLevel_VersosDraft_8": {
+        "X": -15932.069,
+        "Y": 71805.15,
+        "Z": 13074.135
+      },
+    "Chest_SideLevel_VersosDraft_19": {
+        "X": -20144.69,
+        "Y": 74143.555,
+        "Z": 15470.068
+      },
+    "Chest_SideLevel_VersosDraft_18": {
+        "X": -15842.888,
+        "Y": 74985.29,
+        "Z": 16165.056
+      },
+    "Chest_SideLevel_VersosDraft_20": {
+        "X": -28301.799,
+        "Y": 77025.04,
+        "Z": 14128.3
+      },
+    "Chest_SideLevel_VersosDraft_21": {
+        "X": -19545.115,
+        "Y": 68167.42,
+        "Z": 13068.425
+      }
   }
 }

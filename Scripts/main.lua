@@ -1,13 +1,13 @@
 MODS = {
     TPToChest = {
-        activate = false,
+        activate = true,
         PressedKey = Key.F1,
         Modifier_keys = { ModifierKey.ALT },
     },
     ChangeQuestStatus = {
         activate = false,
         PressedKey = Key.F1,
-        Modifier_keys = { ModifierKey.ALT },false
+        Modifier_keys = { ModifierKey.ALT },
     },
     PrintEncounter = {
         activate = true

@@ -1,6 +1,6 @@
 JSON = require("json")
 
-local file = JSON.read_file("F:/Project/UE4SS/Expedition 33/Mods/COE33_Helper/Scripts/data/chests.json") -- JUST CHANGE THIS
+local file = JSON.read_file("ue4ss/Mods/COE33_HELPER/Scripts/data/chests.json") -- JUST CHANGE THIS
 local current_level = ""
 local current_data_in_area = {}
 local current_names_in_area = {}
@@ -93,6 +93,7 @@ end)
 
 if file ~= nil then
     data = file
+    if data then print(data) end
 else
     print("Json nil")
 end

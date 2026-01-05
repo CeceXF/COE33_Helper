@@ -1,5 +1,13 @@
+--Settings
+local shuffle_portals = true
+local portal_shuffle_seed = 33
+local shuffle_et = false
+local random_names = true --placeholder var, will update so that only unentered maps will have random names
+
+--vars
 local portal_transform_array = {}
 local wm_exit
+
 
 function GetPortalLoop()
     local a = FindFirstOf("BP_WorldInfoComponent_C") ---@cast a UBP_WorldInfoComponent_C
@@ -29,8 +37,10 @@ RegisterHook(function_name, function (self, _worldContext, found, levelData, row
 end)
 ]]
 RegisterHook("/Game/Gameplay/WorldMap/BP_PlayerController_WorldMap.BP_PlayerController_WorldMap_C:UnpauseGameplay", function ()
+    if not shuffle_portals then goto break_loop end
+
     GetPortalLoop()
-    local shuffled_portals = ShufflePortals(portal_transform_array,false,true)
+    local shuffled_portals = ShufflePortals(portal_transform_array, shuffle_et, true)
     for k,v in pairs(shuffled_portals) do
         print(k.. " randomised to " .. v[1].DestinationSpawnPointTag.TagName:ToString())
         portal_transform_array[k][1]:K2_SetActorLocationAndRotation(v[2],v[3],false,{},true)
@@ -76,12 +86,13 @@ end)
 -- get shuffled portal_array
 function ShufflePortals(portals,shuffle_et,include_endgame_areas) 
     --temporary vars
-    local seed = 33
 
-
+    if not portal_shuffle_seed then 
+        portal_shuffle_seed = math.random(999)
+    end
 
     --in the actual thing maybe just read from save json or save the correspondence in the save json
-    math.randomseed(seed)
+    math.randomseed(portal_shuffle_seed)
 
     --[[
     Tags are in format: Level.SpawnPoint.x.Entry/Exit
@@ -296,11 +307,10 @@ end)
 
 RegisterHook("/Game/UI/Widgets/HUD_Exploration/WorldMap/WBP_LevelNameWidget.WBP_LevelNameWidget_C:PlayAppearAnimation", function(self)
     local level_text = self:get() ---@type WBP_LevelNameWidget_C
-    local entered = true --placeholder var
 
     local possible_text = {"GOOD\nLUCK","WHO\nKNOWS","UNKNOWN\nAREA","LITERALLY\nJUST 33 SIMONS","According to all known laws of aviation, there is no way a bee should be able to fly.","hi\ndemorck","the game\nawards 2025","???"}
 
-    if not entered then
+    if random_names then
         level_text:SetLevelNameText(FText(possible_text[math.random(#possible_text)]))
 
     end

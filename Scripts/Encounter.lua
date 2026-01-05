@@ -20,9 +20,10 @@ end)
 
 RegisterHook("/Game/jRPGTemplate/Blueprints/Components/AC_jRPG_BattleManager.AC_jRPG_BattleManager_C:LoadEncounterSettings", function (self, ...)
     local battle_manager = self:get() ---@type UAC_jRPG_BattleManager_C
-
-    local scale_to_party = true
     local party_level = 1
+
+    --Settings
+    local scale_to_party = true
     local scale_down_only = false
     local scale_up_only = true
     local change_to
@@ -49,8 +50,8 @@ RegisterHook("/Game/jRPGTemplate/Blueprints/Components/AC_jRPG_BattleManager.AC_
 
         if scale_down_only then
             change_to = math.min(battle_manager.CurrentBattleEncounterLevel, change_to)
-        end
-        if scale_up_only then
+        
+        elseif scale_up_only then
             change_to = math.max(battle_manager.CurrentBattleEncounterLevel, change_to)
         end
 

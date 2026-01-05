@@ -1,6 +1,6 @@
 MODS = {
     TPToChest = {
-        activate = true,
+        activate = false,
         PressedKey = Key.F1,
         Modifier_keys = { ModifierKey.ALT },
     },
@@ -9,8 +9,13 @@ MODS = {
         PressedKey = Key.F1,
         Modifier_keys = { ModifierKey.ALT },
     },
-    PrintEncounter = {
+    Encounter = {
         activate = true
+    },
+    WorldMapStuff = {
+        activate = true,
+        PressedKey = Key.F5,
+        Modifier_keys = {ModifierKey.CONTROL}
     }
 }
 

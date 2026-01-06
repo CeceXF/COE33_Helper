@@ -4,6 +4,7 @@ local portal_set_seed = true
 local shuffle_et = false
 local shuffle_beaches = true
 local shuffle_workshop = true
+local funny_portals = true
 local random_names = false --placeholder var, will update so that only unentered maps will have random names
 
 --vars
@@ -42,13 +43,15 @@ RegisterHook(function_name, function (self, _worldContext, found, levelData, row
 end)
 
 RegisterHook("/Game/Gameplay/WorldMap/BP_PlayerController_WorldMap.BP_PlayerController_WorldMap_C:UnpauseGameplay", function ()
-    if not shuffle_portals or already_shuffled then goto break_loop end
+    
 
     GetPortalLoop()
     local shuffled_portals = ShufflePortals(portal_transform_array, shuffle_et, true)
+    if not shuffle_portals or already_shuffled then goto break_loop end
     for k,v in pairs(shuffled_portals) do
         print(k.. " randomised to " .. v[1].DestinationSpawnPointTag.TagName:ToString())
-        portal_transform_array[k][1]:K2_SetActorTransform(v[2],false,{},true)
+        if funny_portals then portal_transform_array[k][1]:K2_SetActorLocationAndRotation(v[2].Translation,v[2].Rotation,false,{},true)
+        else portal_transform_array[k][1]:K2_SetActorTransform(v[2],false,{},true) end
         
     end
     
@@ -313,8 +316,8 @@ function TeleportPlayer(destination)
     }
     
     local scale_factor = 1500
-    teleport_loc.X = teleport_loc.X + xy_forward_vector.X * scale_factor
-    teleport_loc.Y = teleport_loc.Y + xy_forward_vector.Y * scale_factor
+    teleport_loc.X = teleport_loc.X - xy_forward_vector.X * scale_factor
+    teleport_loc.Y = teleport_loc.Y - xy_forward_vector.Y * scale_factor
 
     player_pawn:K2_SetActorLocationAndRotation(teleport_loc,teleport_rot,false,{},true)
 end
@@ -326,7 +329,7 @@ RegisterKeyBind(Key.F6, {ModifierKey.CONTROL}, function ()
 
     --todo:remove after testing
     GetPortalLoop()
-    local destination = "Level.SpawnPoint.ChromaZoneEntrance.Entry"
+    local destination = "Level.SpawnPoint.Goblu.Entry"
     TeleportPlayer(destination)
 
 

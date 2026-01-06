@@ -47,16 +47,15 @@ RegisterHook("/Game/jRPGTemplate/Blueprints/Components/AC_jRPG_BattleManager.AC_
         end
 
         change_to = math.ceil(party_level * factor)
+        if change_to < 1 then change_to = 1
+        elseif change_to > 300 then change_to = 300 end
 
         if scale_down_only then
-            change_to = math.min(battle_manager.CurrentBattleEncounterLevel, change_to)
-        
+            change_to = math.min(battle_manager.CurrentBattleEncounterLevel, change_to)        
         elseif scale_up_only then
             change_to = math.max(battle_manager.CurrentBattleEncounterLevel, change_to)
         end
 
-
-        battle_manager.CurrentBattleEncounterLevel = math.min(change_to, 300)
     end
 
     

@@ -1,12 +1,16 @@
 --Settings
 local shuffle_portals = true
-local portal_shuffle_seed = 33
+local portal_set_seed = true
 local shuffle_et = false
-local random_names = true --placeholder var, will update so that only unentered maps will have random names
+local shuffle_beaches = true
+local shuffle_workshop = true
+local random_names = false --placeholder var, will update so that only unentered maps will have random names
 
 --vars
 local portal_transform_array = {}
 local wm_exit
+local last_entered -- used for painting workshop and gestral beaches
+local already_shuffled
 
 
 function GetPortalLoop()
@@ -25,47 +29,74 @@ function GetPortalLoop()
             --print("COE33 Portal Name: ".. name)
             --print("COE33 Portal Destination: ".. destination_name)
             --print("COE33 Portal Return: ".. return_name)
-            portal_transform_array[destination_name] = {portal,portal:K2_GetActorLocation(),portal:K2_GetActorRotation()}
+            portal_transform_array[destination_name] = {portal,portal:GetTransform()}
         end)
 end
---[[
+
 local function_name = "/Game/jRPGTemplate/Blueprints/Basics/FL_jRPG_CustomFunctionLibrary.FL_jRPG_CustomFunctionLibrary_C:GetCurrentLevelData"
 RegisterHook(function_name, function (self, _worldContext, found, levelData, rowName)
 
-    local level = rowName:get():ToString()
+    --local level = rowName:get():ToString()
+    already_shuffled = false
     
 end)
-]]
+
 RegisterHook("/Game/Gameplay/WorldMap/BP_PlayerController_WorldMap.BP_PlayerController_WorldMap_C:UnpauseGameplay", function ()
-    if not shuffle_portals then goto break_loop end
+    if not shuffle_portals or already_shuffled then goto break_loop end
 
     GetPortalLoop()
     local shuffled_portals = ShufflePortals(portal_transform_array, shuffle_et, true)
     for k,v in pairs(shuffled_portals) do
         print(k.. " randomised to " .. v[1].DestinationSpawnPointTag.TagName:ToString())
-        portal_transform_array[k][1]:K2_SetActorLocationAndRotation(v[2],v[3],false,{},true)
+        portal_transform_array[k][1]:K2_SetActorTransform(v[2],false,{},true)
         
     end
-
+    
     if wm_exit ~= nil then
+        --exceptions
+        if wm_exit[1] == "FloatingCemetery" then wm_exit[1] = "Cemetery" 
+        elseif wm_exit[1] == "MonocoStationOldLumiere" then wm_exit[1] = "MonocoStation.OldLumiere"
+        elseif wm_exit[1] == "MonocoStationForgotten" then wm_exit[1] = "MonocoStation.Forgotten"
+        elseif wm_exit[1] == "MonocoStationFrozenHearts" then wm_exit[1] = "MonocoStation.FrozenHearts"
+
+
+        end
+
         for k,v in pairs(shuffled_portals) do
-            
-            if string.find(k,wm_exit[1]) and wm_exit[2] and (string.find(k,"Entry") ~= nil or string.find(k,"Entrance") ~= nil) then
+
+            if last_entered ~= nil and string.find(k,last_entered) then 
+                print(last_entered)
                 TeleportPlayer(v[1].DestinationSpawnPointTag.TagName:ToString())
-                print("Tele to: "..v[1].DestinationSpawnPointTag.TagName:ToString())
+                print("COE33 WorldMapStuff - Tele to last entered portal: "..last_entered)
                 wm_exit = nil
                 goto break_loop
-            elseif string.find(k,wm_exit[1]) and not wm_exit[2] and (string.find(k,"Exit") ~= nil or string.find(k,"EndPath") ~= nil )then
-                TeleportPlayer(v[1].DestinationSpawnPointTag.TagName:ToString())
-                print("Tele to: "..v[1].DestinationSpawnPointTag.TagName:ToString())
-                wm_exit = nil
-                goto break_loop
-            
+                
+            else
+                if string.find(k,wm_exit[1]) and wm_exit[2] and (string.find(k,"Entry") ~= nil or string.find(k,"Entrance") ~= nil) then
+                    TeleportPlayer(v[1].DestinationSpawnPointTag.TagName:ToString())
+                    print("COE33 WorldMapStuff - Tele to entrance: "..v[1].DestinationSpawnPointTag.TagName:ToString())
+                    wm_exit = nil
+                    goto break_loop
+                elseif string.find(k,wm_exit[1]) and not wm_exit[2] and (string.find(k,"Exit") ~= nil or string.find(k,"EndPath") ~= nil )then
+                    TeleportPlayer(v[1].DestinationSpawnPointTag.TagName:ToString())
+                    print("COE33 WorldMapStuff - Tele to exit: "..v[1].DestinationSpawnPointTag.TagName:ToString())
+                    wm_exit = nil
+                    goto break_loop
+                
+                elseif string.find(k,wm_exit[1]) and (string.find(k,"Forgotten") or string.find(k,"OldLumiere") or string.find(k,"FrozenHearts") )then
+                    print(k)
+                    TeleportPlayer(v[1].DestinationSpawnPointTag.TagName:ToString())
+                    print("COE33 WorldMapStuff - Tele to misc: "..v[1].DestinationSpawnPointTag.TagName:ToString())
+                    wm_exit = nil
+                    goto break_loop
+                
+                end
             end
         end
-        if wm_exit ~= nil then print("COE33 WorldMapStuff: Unknown Location Specified") end
+        if wm_exit ~= nil then print("COE33 WorldMapStuff: Unknown Location Specified - "..wm_exit[1]) end
     end
     ::break_loop::
+    already_shuffled = true
 end)
 
 RegisterHook("/Game/LevelTools/BP_jRPG_MapTeleportPoint.BP_jRPG_MapTeleportPoint_C:ProcessChangeMap", function (self)
@@ -74,10 +105,16 @@ RegisterHook("/Game/LevelTools/BP_jRPG_MapTeleportPoint.BP_jRPG_MapTeleportPoint
     if string.find(teleport_point_tag,"Entry") then entry = true
     else entry = false
     end
+    --print(entry)
     
     local area_name = string.gsub(string.gsub(string.gsub(teleport_point_tag,"Entry",""),"Exit",""), "Level.SpawnPoint.WorldMap.", "")
     wm_exit = {area_name,entry}
-    print(area_name)
+    --print(teleport_point_tag)
+
+    if not string.find(teleport_point_tag,"Generic.Return") and not string.find(teleport_point_tag,"WorldMap") then
+        last_entered = teleport_point_tag
+    end
+    print(last_entered)
 
 
 end)
@@ -87,7 +124,11 @@ end)
 function ShufflePortals(portals,shuffle_et,include_endgame_areas) 
     --temporary vars
 
-    if not portal_shuffle_seed then 
+    local portal_shuffle_seed
+
+    if portal_set_seed then
+        portal_shuffle_seed = 33
+    else 
         portal_shuffle_seed = math.random(999)
     end
 
@@ -135,16 +176,18 @@ function ShufflePortals(portals,shuffle_et,include_endgame_areas)
     local two_entrance_tags_copy = {".Goblu",".AncientSanctuary",".YellowForest",".ForgottenBattlefield",".SeaCliff",".OldLumiere"}
     table.sort(two_entrance_tags)
 
-    for key,value in pairs(portal_transform_array) do
+    for key,value in pairs(portals) do
         for _, value2 in pairs(two_entrance_tags) do
-            if string.find(key,value2) ~= nil then
+
+            if string.find(key,"MonocoStation") then break
+            elseif string.find(key,value2) ~= nil then
                 two_entrances[#two_entrances+1] = {key,value}
 
                 goto continue 
             end
         end
 
-        if string.find(key,"MonocoStation") or (string.find(key,"CleasTower") and not shuffle_et) or string.find(key,"SpringMeadows")  or string.find(key,"CleaWorkshop") or string.find(key,"GestralBeach") then
+        if string.find(key,"MonocoStation") or (string.find(key,"CleasTower") and not shuffle_et) or string.find(key,"SpringMeadows")  or (string.find(key,"CleaWorkshop") and not shuffle_workshop) or (string.find(key,"GestralBeach") and not shuffle_beaches)then
             goto continue
         else 
             one_entrance[#one_entrance+1] = {key,value}
@@ -253,7 +296,7 @@ function TeleportPlayer(destination)
 
     -- use portal destination tags as key
     print("COE33 Portal - Warp To: ".. destination)
-    local teleport_loc = portal_transform_array[destination][2]
+    local teleport_loc = portal_transform_array[destination][2].Translation
     if teleport_loc == nil then 
         print("COE33 WorldMapStuff - Location doesn't exist!")
         return 

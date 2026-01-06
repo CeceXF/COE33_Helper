@@ -11,6 +11,8 @@ Painting Workshop is included by default but can be changed by setting shuffle_w
 
 Gestral Beaches are included by default but can be changed by setting shuffle_beaches to true.
 
+Portals will keep their vanilla sizes by default  (The Monolith portal is always huge). Can be changed by setting funny_portals to false.
+
 Weird flavour text to replace level names so you don't know which map you'll be getting until you load in is enabled by default. Can be disabled by setting random_names to false.
 
 # Encounter.lua

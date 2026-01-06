@@ -1,11 +1,15 @@
 # WorldMapStuff.lua
 Currently set to automatically shuffle maps on entering the world map. 
 
-**Excluded maps: Spring Meadows, Monoco's Station, Painting Workshop**
+**Excluded maps: Spring Meadows, Monoco's Station**
 
 Set portal_shuffle_seed to nil if you want random portals every time.
 
 Endless Tower is excluded by default but can be changed by setting shuffle_et to true.
+
+Painting Workshop is included by default but can be changed by setting shuffle_workshop to true.
+
+Gestral Beaches are included by default but can be changed by setting shuffle_beaches to true.
 
 Weird flavour text to replace level names so you don't know which map you'll be getting until you load in is enabled by default. Can be disabled by setting random_names to false.
 

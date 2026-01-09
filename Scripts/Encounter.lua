@@ -1,4 +1,10 @@
 --Settings
+local scale_to_party = true
+local scale_down_only = false
+local scale_up_only = true
+local change_to
+local factor = 1.1
+
 local randomise_every_encounter = false
 
 --vars
@@ -37,12 +43,8 @@ end)
 RegisterHook("/Game/jRPGTemplate/Blueprints/Components/AC_jRPG_BattleManager.AC_jRPG_BattleManager_C:LoadEncounterSettings", function (self, ...)
     local battle_manager = self:get() ---@type UAC_jRPG_BattleManager_C
     local party_level = 1
-    --Settings
-    local scale_to_party = true
-    local scale_down_only = false
-    local scale_up_only = true
-    local change_to
-    local factor = 1.1
+
+    
 
     if scale_to_party then
 

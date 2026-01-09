@@ -1,5 +1,5 @@
 --Settings
-local randomise_every_encounter = true
+local randomise_every_encounter = false
 
 --vars
 local enemy_dt

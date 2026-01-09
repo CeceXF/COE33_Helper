@@ -16,6 +16,7 @@ Portals will keep their vanilla sizes by default  (The Monolith portal is always
 Weird flavour text to replace level names so you don't know which map you'll be getting until you load in is enabled by default. Can be disabled by setting random_names to false.
 
 # Encounter.lua
+## Encounter Scaling
 Enemy encounter scaling to highest level character in your party is enabled by default. Set scale_to_party to false if you'd prefer encounters having their default vanilla levels.
 
 scale_down_only will only affect enemies with a higher level than you. Encounters with a vanilla level below yours will be unaffected.
@@ -25,3 +26,6 @@ scale_up_only will only affect enemies with a lower level than you. Encounters w
 Turn both scale_down_only and scale_up_only if you'd like enemies to always scale to your party level.
 
 factor is how many times your highest character level to scale the encounter to. Default is at 1.1x your highest character level. 
+
+## Enemy Randomiser
+Enemy randomiser proof of concept is off by default. Turn randomise_every_encounter to true to enable.

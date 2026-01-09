@@ -5,8 +5,7 @@ local scale_up_only = true
 local change_to
 local factor = 1.1
 
-local randomise_every_encounter = false
-
+local randomise_every_encounter = true
 --vars
 local enemy_dt
 local enemies = {}
@@ -95,8 +94,18 @@ local new_enemy = "DS_Noire"
 
 --enemies:AddRow(row_name,new_enemy_row)
 
-
 if randomise_every_encounter then 
+    enemy_dt = StaticFindObject("/Game/jRPGTemplate/Datatables/DT_jRPG_Enemies.DT_jRPG_Enemies")
+    if not enemy_dt:IsValid() then return end
+
+    enemy_dt:ForEachRow(function (name,value)
+        table.insert(enemies,{name, value})
+    end)
+
+    print("Enemy Datatable get :3")
+
+
+
     enemy_dt:ForEachRow(function(enemy_name,enemy_data)
         local index = math.random(#enemies)
         local random_new_enemy = enemies[index][1]
@@ -110,23 +119,6 @@ end
 
 end)
 
-
-
-
---randomise enemies
-
-RegisterHook("/Game/Gameplay/Save/BP_SaveManager.BP_SaveManager_C:OnLoadOperationsDone", function ()
-
-
-    enemy_dt = StaticFindObject("/Game/jRPGTemplate/Datatables/DT_jRPG_Enemies.DT_jRPG_Enemies")
-    if not enemy_dt:IsValid() then return end
-    
-    enemy_dt:ForEachRow(function (name,value)
-        table.insert(enemies,{name, value})
-    end)
-    
-    print("Enemy Datatable get :3")
-end)
 
 
 

@@ -1,5 +1,5 @@
 --Settings
-local shuffle_portals = true
+local shuffle_portals = false
 local portal_set_seed = true
 local shuffle_et = false
 local shuffle_beaches = true
@@ -289,8 +289,8 @@ end
 
 --get tp to world map details
 RegisterKeyBind(Key.F5, {ModifierKey.CONTROL}, function ()
-    local teleport = FindFirstOf("BP_jRPG_MapTeleportPoint_C")
-    print(teleport.DestinationSpawnPointTag.TagName:ToString())
+    local teleport_to = "Level.SpawnPoint.SpringMeadows.TreeExit"
+    TeleportPlayer(teleport_to)
 
 end) 
 
@@ -316,8 +316,8 @@ function TeleportPlayer(destination)
     }
     
     local scale_factor = 1500
-    teleport_loc.X = teleport_loc.X - xy_forward_vector.X * scale_factor
-    teleport_loc.Y = teleport_loc.Y - xy_forward_vector.Y * scale_factor
+    teleport_loc.X = teleport_loc.X + xy_forward_vector.X * scale_factor
+    teleport_loc.Y = teleport_loc.Y + xy_forward_vector.Y * scale_factor
 
     player_pawn:K2_SetActorLocationAndRotation(teleport_loc,teleport_rot,false,{},true)
 end
@@ -325,6 +325,7 @@ end
 
 --teleport player
 --just used to check area names and teleport function
+--[[
 RegisterKeyBind(Key.F6, {ModifierKey.CONTROL}, function ()
 
     --todo:remove after testing
@@ -337,7 +338,7 @@ RegisterKeyBind(Key.F6, {ModifierKey.CONTROL}, function ()
     
 
 end)
---[[
+
 RegisterKeyBind(Key.F7,{ModifierKey.CONTROL}, function () 
     local player_pawn = FindFirstOf("BP_jRPG_Character_World_C")
     local adjust_loc = {

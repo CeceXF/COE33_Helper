@@ -1,3 +1,6 @@
+# Prerequisites
+You will need the [experimental version of UE4SS] (https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/experimental-latest)
+
 # WorldMapStuff.lua
 Currently set to automatically shuffle maps on entering the world map. 
 
@@ -29,3 +32,4 @@ factor is how many times your highest character level to scale the encounter to.
 
 ## Enemy Randomiser
 Enemy randomiser proof of concept is off by default. Turn randomise_every_encounter to true to enable.
+the other settings are kinda self explanatory

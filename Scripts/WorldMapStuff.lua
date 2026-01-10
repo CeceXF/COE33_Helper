@@ -12,7 +12,7 @@ local portal_transform_array = {}
 local wm_exit
 local last_entered -- used for painting workshop and gestral beaches
 local already_shuffled
-
+local hooks_registered = false
 
 function GetPortalLoop()
     local a = FindFirstOf("BP_WorldInfoComponent_C") ---@cast a UBP_WorldInfoComponent_C
@@ -36,91 +36,101 @@ end
 
 local function_name = "/Game/jRPGTemplate/Blueprints/Basics/FL_jRPG_CustomFunctionLibrary.FL_jRPG_CustomFunctionLibrary_C:GetCurrentLevelData"
 RegisterHook(function_name, function (self, _worldContext, found, levelData, rowName)
-
+    local name = rowName:get()
+    local level = name:ToString()
     --local level = rowName:get():ToString()
     already_shuffled = false
+    if not hooks_registered and level == "WorldMap" then
+        Register_ShuffleAndTeleport()
+        Register_SaveLastEnteredPortal()
+        hooks_registered = true
+    end
     
 end)
 
-RegisterHook("/Game/Gameplay/WorldMap/BP_PlayerController_WorldMap.BP_PlayerController_WorldMap_C:UnpauseGameplay", function ()
-    
-
-    GetPortalLoop()
-    local shuffled_portals = ShufflePortals(portal_transform_array, shuffle_et, true)
-    if not shuffle_portals or already_shuffled then goto break_loop end
-    for k,v in pairs(shuffled_portals) do
-        print(k.. " randomised to " .. v[1].DestinationSpawnPointTag.TagName:ToString())
-        if funny_portals then portal_transform_array[k][1]:K2_SetActorLocationAndRotation(v[2].Translation,v[2].Rotation,false,{},true)
-        else portal_transform_array[k][1]:K2_SetActorTransform(v[2],false,{},true) end
+function Register_ShuffleAndTeleport()
+    RegisterHook("/Game/Gameplay/WorldMap/BP_PlayerController_WorldMap.BP_PlayerController_WorldMap_C:UnpauseGameplay", function ()
         
-    end
-    
-    if wm_exit ~= nil then
-        --exceptions
-        if wm_exit[1] == "FloatingCemetery" then wm_exit[1] = "Cemetery" 
-        elseif wm_exit[1] == "MonocoStationOldLumiere" then wm_exit[1] = "MonocoStation.OldLumiere"
-        elseif wm_exit[1] == "MonocoStationForgotten" then wm_exit[1] = "MonocoStation.Forgotten"
-        elseif wm_exit[1] == "MonocoStationFrozenHearts" then wm_exit[1] = "MonocoStation.FrozenHearts"
 
-
-        end
-
+        GetPortalLoop()
+        local shuffled_portals = ShufflePortals(portal_transform_array, shuffle_et, true)
+        if not shuffle_portals or already_shuffled then goto break_loop end
         for k,v in pairs(shuffled_portals) do
+            print(k.. " randomised to " .. v[1].DestinationSpawnPointTag.TagName:ToString())
+            if funny_portals then portal_transform_array[k][1]:K2_SetActorLocationAndRotation(v[2].Translation,v[2].Rotation,false,{},true)
+            else portal_transform_array[k][1]:K2_SetActorTransform(v[2],false,{},true) end
+            
+        end
+        
+        if wm_exit ~= nil then
+            --exceptions
+            if wm_exit[1] == "FloatingCemetery" then wm_exit[1] = "Cemetery" 
+            elseif wm_exit[1] == "MonocoStationOldLumiere" then wm_exit[1] = "MonocoStation.OldLumiere"
+            elseif wm_exit[1] == "MonocoStationForgotten" then wm_exit[1] = "MonocoStation.Forgotten"
+            elseif wm_exit[1] == "MonocoStationFrozenHearts" then wm_exit[1] = "MonocoStation.FrozenHearts"
 
-            if last_entered ~= nil and string.find(k,last_entered) then 
-                print(last_entered)
-                TeleportPlayer(v[1].DestinationSpawnPointTag.TagName:ToString())
-                print("COE33 WorldMapStuff - Tele to last entered portal: "..last_entered)
-                wm_exit = nil
-                goto break_loop
-                
-            else
-                if string.find(k,wm_exit[1]) and wm_exit[2] and (string.find(k,"Entry") ~= nil or string.find(k,"Entrance") ~= nil) then
+
+            end
+
+            for k,v in pairs(shuffled_portals) do
+
+                if last_entered ~= nil and string.find(k,last_entered) then 
+                    print(last_entered)
                     TeleportPlayer(v[1].DestinationSpawnPointTag.TagName:ToString())
-                    print("COE33 WorldMapStuff - Tele to entrance: "..v[1].DestinationSpawnPointTag.TagName:ToString())
+                    print("COE33 WorldMapStuff - Tele to last entered portal: "..last_entered)
                     wm_exit = nil
                     goto break_loop
-                elseif string.find(k,wm_exit[1]) and not wm_exit[2] and (string.find(k,"Exit") ~= nil or string.find(k,"EndPath") ~= nil )then
-                    TeleportPlayer(v[1].DestinationSpawnPointTag.TagName:ToString())
-                    print("COE33 WorldMapStuff - Tele to exit: "..v[1].DestinationSpawnPointTag.TagName:ToString())
-                    wm_exit = nil
-                    goto break_loop
-                
-                elseif string.find(k,wm_exit[1]) and (string.find(k,"Forgotten") or string.find(k,"OldLumiere") or string.find(k,"FrozenHearts") )then
-                    print(k)
-                    TeleportPlayer(v[1].DestinationSpawnPointTag.TagName:ToString())
-                    print("COE33 WorldMapStuff - Tele to misc: "..v[1].DestinationSpawnPointTag.TagName:ToString())
-                    wm_exit = nil
-                    goto break_loop
-                
+                    
+                else
+                    if string.find(k,wm_exit[1]) and wm_exit[2] and (string.find(k,"Entry") ~= nil or string.find(k,"Entrance") ~= nil) then
+                        TeleportPlayer(v[1].DestinationSpawnPointTag.TagName:ToString())
+                        print("COE33 WorldMapStuff - Tele to entrance: "..v[1].DestinationSpawnPointTag.TagName:ToString())
+                        wm_exit = nil
+                        goto break_loop
+                    elseif string.find(k,wm_exit[1]) and not wm_exit[2] and (string.find(k,"Exit") ~= nil or string.find(k,"EndPath") ~= nil )then
+                        TeleportPlayer(v[1].DestinationSpawnPointTag.TagName:ToString())
+                        print("COE33 WorldMapStuff - Tele to exit: "..v[1].DestinationSpawnPointTag.TagName:ToString())
+                        wm_exit = nil
+                        goto break_loop
+                    
+                    elseif string.find(k,wm_exit[1]) and (string.find(k,"Forgotten") or string.find(k,"OldLumiere") or string.find(k,"FrozenHearts") )then
+                        print(k)
+                        TeleportPlayer(v[1].DestinationSpawnPointTag.TagName:ToString())
+                        print("COE33 WorldMapStuff - Tele to misc: "..v[1].DestinationSpawnPointTag.TagName:ToString())
+                        wm_exit = nil
+                        goto break_loop
+                    
+                    end
                 end
             end
+            if wm_exit ~= nil then print("COE33 WorldMapStuff: Unknown Location Specified - "..wm_exit[1]) end
         end
-        if wm_exit ~= nil then print("COE33 WorldMapStuff: Unknown Location Specified - "..wm_exit[1]) end
-    end
-    ::break_loop::
-    already_shuffled = true
-end)
+        ::break_loop::
+        already_shuffled = true
+    end)
+end
 
-RegisterHook("/Game/LevelTools/BP_jRPG_MapTeleportPoint.BP_jRPG_MapTeleportPoint_C:ProcessChangeMap", function (self)
-    local teleport_point_tag = self:get().DestinationSpawnPointTag.TagName:ToString()
-    local entry
-    if string.find(teleport_point_tag,"Entry") then entry = true
-    else entry = false
-    end
-    --print(entry)
-    
-    local area_name = string.gsub(string.gsub(string.gsub(teleport_point_tag,"Entry",""),"Exit",""), "Level.SpawnPoint.WorldMap.", "")
-    wm_exit = {area_name,entry}
-    --print(teleport_point_tag)
+function Register_SaveLastEnteredPortal()
+    RegisterHook("/Game/LevelTools/BP_jRPG_MapTeleportPoint.BP_jRPG_MapTeleportPoint_C:ProcessChangeMap", function (self)
+        local teleport_point_tag = self:get().DestinationSpawnPointTag.TagName:ToString()
+        local entry
+        if string.find(teleport_point_tag,"Entry") then entry = true
+        else entry = false
+        end
+        --print(entry)
+        
+        local area_name = string.gsub(string.gsub(string.gsub(teleport_point_tag,"Entry",""),"Exit",""), "Level.SpawnPoint.WorldMap.", "")
+        wm_exit = {area_name,entry}
+        --print(teleport_point_tag)
 
-    if not string.find(teleport_point_tag,"Generic.Return") and not string.find(teleport_point_tag,"WorldMap") then
-        last_entered = teleport_point_tag
-    end
-    print(last_entered)
+        if not string.find(teleport_point_tag,"Generic.Return") and not string.find(teleport_point_tag,"WorldMap") then
+            last_entered = teleport_point_tag
+        end
+        print(last_entered)
 
 
-end)
+    end)
+end
 
 
 -- get shuffled portal_array

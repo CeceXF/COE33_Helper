@@ -2,7 +2,9 @@
 You will need the [experimental version of UE4SS](https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/experimental-latest)
 
 # WorldMapStuff.lua
-Currently set to automatically shuffle maps on entering the world map. 
+Disabled by default.
+
+Shuffles maps upon entering world map.
 
 **Excluded maps: Spring Meadows, Monoco's Station**
 

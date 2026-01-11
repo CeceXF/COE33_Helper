@@ -110,7 +110,9 @@
         "VD_Licorne",
         "VD_Barbasucette",
         "VD_Franctale",
-        "VD_Machinapieds"
+        "VD_Machinapieds",        
+        "CC_Cruler",
+        "CC_Bruler"
     ],
 
     "minibosses" : [
@@ -146,8 +148,6 @@
         "SM_Boss_Eveque_Ice_ALPHA_CleaTower",
         "L_MaelleTutorial_NoTutorial",
         "L_MaelleTutorial_NoTutorial_Civilian",
-        "CC_Cruler",
-        "CC_Bruler",
         "CP_Stalact",
         "CP_Glaise",
         "CP_Benisseur",

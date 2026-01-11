@@ -9,15 +9,24 @@ local randomise_every_encounter = false --random enemies every encounter
 local keep_bosses_in_boss_encounters = true
 local include_cut_content = false
 local randomise_swc_renoir = true -- so u dont need to potentially fight simon as 1hp level 1 gustave
-local randomise_white_nevrons = false
+local include_white_nevron_enemies = false
+local randomise_white_nevron_encounters = false
 local randomise_adds = false --affects summon petank, chromatic petank, renoir 1, danseuse, chromatic danseuse
-local randomise_superbosses_except_duo = true
-local randomise_duollistes = false -- buggy -  they dont die properly allegedly
-local randomise_mimes = true
-local randomise_petanks = true
-local include_tutorials = false
-local include_gimmick_fights = false
-local randomise_merchants = false
+local include_superbosses_except_duo = true
+local randomise_superboss_encounters_except_duo = false
+local include_duolliste = false -- buggy -  they dont die properly allegedly
+local randomise_duolliste_encounter = false
+local include_mime_enemies = false
+local randomise_mime_encounters = true
+local mimes_are_bosses = true -- forces a boss into mime encounters
+local include_petank_enemies = true
+local randomise_petank_encounters = true
+local include_tutorial_enemies = false
+local randomise_tutorial_encounters = true --doesnt do anything if you have tutorials turned off
+local include_gimmick_enemies = false
+local randomise_gimmick_encounters = false
+local include_merchant_enemies = false
+local randomise_merchant_encounters = false --you wont be able to unlock their inventory unless you actually defeat them when you find them elsewhere
 --check how to change opera house curtain state
 
 
@@ -92,6 +101,7 @@ RegisterHook("/Game/jRPGTemplate/Blueprints/Components/AC_jRPG_BattleManager.AC_
         elseif scale_up_only then
             change_to = math.max(battle_manager.CurrentBattleEncounterLevel, change_to)
         end
+        battle_manager.CurrentBattleEncounterLevel = change_to
 
     end
 
@@ -160,50 +170,57 @@ RegisterHook("/Game/jRPGTemplate/Datatables/BP_FunctionLibrary_DT_Enemies_Access
             end
         end
 
-        if randomise_white_nevrons then
+        if include_white_nevron_enemies then
             for i, enemy in ipairs(enemy_categories["white nevrons"]) do
                 table.insert(enemies,{enemy,enemy_dt:FindRow(enemy)})
             end
         end
 
-        if randomise_superbosses_except_duo then 
+        if include_superbosses_except_duo then 
             for i, boss in ipairs(enemy_categories["superbosses"]) do 
                 table.insert(bosses, {boss,enemy_dt:FindRow(boss)})
             end
         end
 
-        if randomise_duollistes then
+        if include_duolliste then
             for i, boss in ipairs(enemy_categories["duollistes"]) do 
                 table.insert(bosses, {boss,enemy_dt:FindRow(boss)})
             end
         end
 
-        if randomise_petanks then 
+        if include_petank_enemies then 
             for i, enemy in ipairs(enemy_categories["petanks"]) do
                 table.insert(enemies,{enemy,enemy_dt:FindRow(enemy)})
             end
         end
 
-        if randomise_mimes then 
-            for i, enemy in ipairs(enemy_categories["mimes"]) do
-                table.insert(enemies,{enemy,enemy_dt:FindRow(enemy)})
+        if include_mime_enemies then 
+            if mimes_are_bosses then
+                for i, boss in ipairs(enemy_categories["mimes"]) do
+                    table.insert(bosses,{boss,enemy_dt:FindRow(boss)})
+                end
+            else 
+                for i, enemy in ipairs(enemy_categories["mimes"]) do
+                    table.insert(enemies,{enemy,enemy_dt:FindRow(enemy)})
+                end
             end
+            
         end
 
-        if include_tutorials then 
+        if include_tutorial_enemies then 
             for i, boss in ipairs(enemy_categories["tutorials"]) do
                 table.insert(bosses,{boss,enemy_dt:FindRow(boss)})
             end
         end
 
-        if include_gimmick_fights then 
+        if include_gimmick_enemies then 
             for i, boss in ipairs(enemy_categories["gimmicks"]) do
                 table.insert(bosses,{boss,enemy_dt:FindRow(boss)})
             end
             
         end
 
-        if randomise_merchants then 
+        if randomise_merchant_encounters then 
             for i, enemy in ipairs(enemy_categories["merchants"]) do
                 table.insert(enemies,{enemy,enemy_dt:FindRow(enemy)})
             end
@@ -211,10 +228,49 @@ RegisterHook("/Game/jRPGTemplate/Datatables/BP_FunctionLibrary_DT_Enemies_Access
 
         print("Enemy Datatable get :3")
 
-        local adds_str = "|"
-        
+        local add_str = "|"   
         for _,add in ipairs(enemy_categories["adds"]) do
-            adds_str = adds_str..add.."|"
+            add_str = add_str..add.."|"
+        end
+
+        local white_nevron_str = "|"
+        for _,white_nevron in ipairs(enemy_categories["white nevrons"]) do
+            white_nevron_str = white_nevron_str..white_nevron.."|"
+        end
+
+        local super_str = "|"
+        for _,super in ipairs(enemy_categories["superbosses"]) do
+            super_str = super_str..super.."|"
+        end
+
+        local duo_str = "|"
+        for _,duo in ipairs(enemy_categories["duollistes"]) do
+            duo_str = duo_str..duo.."|"
+        end
+
+        local mime_str = "|"
+        for _,mime in ipairs(enemy_categories["mimes"]) do
+            mime_str = mime_str..mime.."|"
+        end
+
+        local petank_str = "|"
+        for _,petank in ipairs(enemy_categories["petanks"]) do
+            petank_str = petank_str..petank.."|"
+        end
+
+        local tuto_str = "|"
+        for _,tuto in ipairs(enemy_categories["tutorials"]) do
+            tuto_str = tuto_str..tuto.."|"
+        end
+
+        local gimmick_str = "|"
+        for _,gimmick in ipairs(enemy_categories["gimmicks"]) do
+            gimmick_str = gimmick_str..gimmick.."|"
+        end
+
+        local merchant_str = "|"
+        for _,merchant in ipairs(enemy_categories["merchants"]) do
+            merchant_str = merchant_str..merchant.."|"
         end
 
         if not keep_bosses_in_boss_encounters then 
@@ -226,9 +282,10 @@ RegisterHook("/Game/jRPGTemplate/Datatables/BP_FunctionLibrary_DT_Enemies_Access
         enemy_dt:ForEachRow(function(enemy_name,enemy_data)
             local index
             local random_new_enemy
-            if keep_bosses_in_boss_encounters and enemy_data.IsBoss_46_F2839289483FE917FB914594C70C7CE4 then
+            if keep_bosses_in_boss_encounters and (enemy_data.IsBoss_46_F2839289483FE917FB914594C70C7CE4 or (mimes_are_bosses and string.find("Mime",enemy_name))) then
                 index = math.random(#bosses)
                 random_new_enemy = bosses[index][1]
+
             else
                 index = math.random(#enemies)
                 random_new_enemy = enemies[index][1]
@@ -236,13 +293,23 @@ RegisterHook("/Game/jRPGTemplate/Datatables/BP_FunctionLibrary_DT_Enemies_Access
 
             --print("COE33 Encounter - New Enemy: "..random_new_enemy)
             local new_enemy_row = enemy_dt:FindRow(random_new_enemy) -- UScriptStruct
+
+            local check_adds = randomise_adds or not string.find(enemy_name,add_str)
+            local check_white_nevron_encounter = randomise_white_nevron_encounters or not string.find(enemy_name,white_nevron_str)
+            local check_supers_encounter = randomise_superboss_encounters_except_duo or not string.find(enemy_name,super_str)
+            local check_duo_encounter = randomise_duolliste_encounter or not string.find(enemy_name,duo_str)
+            local check_mime_encounter = randomise_mime_encounters or not string.find(enemy_name,mime_str)
+            local check_petank_encounter = randomise_petank_encounters or not string.find(enemy_name,petank_str)
+            local check_tuto_encounter = randomise_tutorial_encounters or not string.find(enemy_name,tuto_str)
+            local check_gimmick_encounter = randomise_gimmick_encounters or not string.find(enemy_name,gimmick_str)
+            local check_merchant_encounter = randomise_merchant_encounters or not string.find(enemy_name,merchant_str)
             
             if enemy_name == "SC_MirrorRenoir_GustaveEnd" then
                 if randomise_swc_renoir then
                     enemy_dt:AddRow(enemy_name,new_enemy_row)
                 end
             
-            elseif  randomise_adds or not string.find(enemy_name,adds_str) then
+            elseif check_adds or check_white_nevron_encounter or check_supers_encounter or check_duo_encounter or check_mime_encounter or check_petank_encounter or check_tuto_encounter or check_gimmick_encounter or check_merchant_encounter then
                 enemy_dt:AddRow(enemy_name,new_enemy_row)            
             end
         end)

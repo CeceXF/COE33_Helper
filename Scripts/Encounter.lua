@@ -1,7 +1,7 @@
 --Settings
 local scale_to_party = true
 local scale_down_only = false
-local scale_up_only = true
+local scale_up_only = false
 local factor = 1.1
 
 local randomise_enemies = true
@@ -282,7 +282,7 @@ RegisterHook("/Game/jRPGTemplate/Datatables/BP_FunctionLibrary_DT_Enemies_Access
         enemy_dt:ForEachRow(function(enemy_name,enemy_data)
             local index
             local random_new_enemy
-            if keep_bosses_in_boss_encounters and (enemy_data.IsBoss_46_F2839289483FE917FB914594C70C7CE4 or (mimes_are_bosses and string.find("Mime",enemy_name))) then
+            if keep_bosses_in_boss_encounters and (enemy_data.IsBoss_46_F2839289483FE917FB914594C70C7CE4 or (mimes_are_bosses and string.find(enemy_name,"Mime")) or string.find(string.lower(enemy_name),"alpha")) then
                 index = math.random(#bosses)
                 random_new_enemy = bosses[index][1]
 
@@ -295,14 +295,14 @@ RegisterHook("/Game/jRPGTemplate/Datatables/BP_FunctionLibrary_DT_Enemies_Access
             local new_enemy_row = enemy_dt:FindRow(random_new_enemy) -- UScriptStruct
 
             local check_adds = randomise_adds or not string.find(enemy_name,add_str)
-            local check_white_nevron_encounter = randomise_white_nevron_encounters or not string.find(enemy_name,white_nevron_str)
-            local check_supers_encounter = randomise_superboss_encounters_except_duo or not string.find(enemy_name,super_str)
-            local check_duo_encounter = randomise_duolliste_encounter or not string.find(enemy_name,duo_str)
-            local check_mime_encounter = randomise_mime_encounters or not string.find(enemy_name,mime_str)
-            local check_petank_encounter = randomise_petank_encounters or not string.find(enemy_name,petank_str)
-            local check_tuto_encounter = randomise_tutorial_encounters or not string.find(enemy_name,tuto_str)
-            local check_gimmick_encounter = randomise_gimmick_encounters or not string.find(enemy_name,gimmick_str)
-            local check_merchant_encounter = randomise_merchant_encounters or not string.find(enemy_name,merchant_str)
+            local check_white_nevron_encounter = randomise_white_nevron_encounters or not string.find(white_nevron_str,enemy_name)
+            local check_supers_encounter = randomise_superboss_encounters_except_duo or not string.find(super_str,enemy_name)
+            local check_duo_encounter = randomise_duolliste_encounter or not string.find(duo_str,enemy_name)
+            local check_mime_encounter = randomise_mime_encounters or not string.find(mime_str,enemy_name)
+            local check_petank_encounter = randomise_petank_encounters or not string.find(petank_str,enemy_name)
+            local check_tuto_encounter = randomise_tutorial_encounters or not string.find(tuto_str,enemy_name)
+            local check_gimmick_encounter = randomise_gimmick_encounters or not string.find(gimmick_str,enemy_name)
+            local check_merchant_encounter = randomise_merchant_encounters or not string.find(merchant_str,enemy_name)
             
             if enemy_name == "SC_MirrorRenoir_GustaveEnd" then
                 if randomise_swc_renoir then

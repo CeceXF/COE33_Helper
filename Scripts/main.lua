@@ -13,7 +13,7 @@ MODS = {
         activate = true
     },
     WorldMapStuff = {
-        activate = true,
+        activate = false,
         PressedKey = Key.F5,
         Modifier_keys = {ModifierKey.CONTROL}
     }

@@ -42,7 +42,7 @@ local enemies = {}
 local bosses = {}
 local enemies_shuffled = false
 local number_of_turns = 0
-local hooks_registered = false
+local rng_encounter_count = 0
 
 
 RegisterHook("/Game/jRPGTemplate/Blueprints/Components/AC_jRPG_BattleManager.AC_jRPG_BattleManager_C:StartBattle", function (self, ...)
@@ -273,8 +273,6 @@ RegisterHook("/Game/jRPGTemplate/Datatables/BP_FunctionLibrary_DT_Enemies_Access
         PopulateEnemies()
         PopulateBosses()
 
- 
-
         print("Enemy Datatable get :3")
 
         local add_str = "|"   
@@ -322,6 +320,14 @@ RegisterHook("/Game/jRPGTemplate/Datatables/BP_FunctionLibrary_DT_Enemies_Access
             merchant_str = merchant_str..merchant.."|"
         end
 
+        local cut_content_str = "|"
+        for _,cut_enemy in ipairs(enemy_categories["cut regular enemies"]) do
+            cut_content_str = cut_enemy.."|"
+        end
+        for _,cut_enemy in ipairs(enemy_categories["cut content bosses"]) do
+            cut_content_str = cut_enemy.."|"
+        end
+
         if not keep_bosses_in_boss_encounters then 
             for i=1,#bosses,1 do
                 enemies[#enemies+1] = bosses[i]
@@ -332,6 +338,9 @@ RegisterHook("/Game/jRPGTemplate/Datatables/BP_FunctionLibrary_DT_Enemies_Access
         local bosses_temp = {}
 
         enemy_dt:ForEachRow(function(enemy_name,enemy_data)
+            if string.find(cut_content_str,enemy_name) then
+                goto nextrow
+            end
             local index
             local random_new_enemy
             if #enemies_temp == 0 then
@@ -374,6 +383,8 @@ RegisterHook("/Game/jRPGTemplate/Datatables/BP_FunctionLibrary_DT_Enemies_Access
             elseif check_adds or check_white_nevron_encounter or check_supers_encounter or check_duo_encounter or check_mime_encounter or check_petank_encounter or check_tuto_encounter or check_gimmick_encounter or check_merchant_encounter then
                 enemy_dt:AddRow(enemy_name,new_enemy_row)            
             end
+
+            ::nextrow::
         end)
 
         if not randomise_every_encounter then 
@@ -388,7 +399,10 @@ end)
 
 --coward button
 RegisterKeyBind(Key.F6, {ModifierKey.CONTROL}, function ()
+    local date = os.date("*t")
+    math.randomseed(date["min"] + date["sec"],rng_encounter_count)
     enemies_shuffled = false
+
 end)
 
 

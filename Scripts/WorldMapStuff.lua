@@ -13,7 +13,7 @@ local portal_transform_array = {}
 local shuffled_portals = {}
 local wm_exit
 local last_entered = "" -- used for painting workshop and gestral beaches
-local already_shuffled
+local already_shuffled = false
 local hooks_registered = false
 
 function GetPortalLoop()
@@ -30,7 +30,7 @@ function GetPortalLoop()
             --print(destination_name)
             --local return_name = portal.ReturnSpawnPointTag.TagName:ToString()
             --print("COE33 Portal Name: ".. name)
-            --print("COE33 Portal Destination: ".. destination_name)
+            print("COE33 Portal Destination: ".. destination_name)
             --print("COE33 Portal Return: ".. return_name)
             portal_transform_array[destination_name] = {portal,portal:GetTransform()}
         end)
@@ -42,7 +42,6 @@ RegisterHook(function_name, function (self, _worldContext, found, levelData, row
     local name = rowName:get()
     local level = name:ToString()
     --local level = rowName:get():ToString()
-    already_shuffled = false
     if not hooks_registered and level == "WorldMap" then
         Register_ShuffleAndTeleport()
         Register_SaveLastEnteredPortal()
@@ -132,6 +131,7 @@ function Register_SaveLastEnteredPortal()
 
         if not string.find(teleport_point_tag,"Generic.Return") and not string.find(teleport_point_tag,"WorldMap") then
             last_entered = teleport_point_tag
+            already_shuffled = false
         end
         print(last_entered)
 
@@ -322,7 +322,7 @@ function TeleportPlayer(destination)
         return 
     end
     --increase height so player doesn't clip into the map 
-    teleport_loc.Z = teleport_loc.Z + 10000
+    teleport_loc.Z = teleport_loc.Z + 2000
 
     local teleport_rot = portal_transform_array[destination][3]
     --adjust player position to be in front of portal

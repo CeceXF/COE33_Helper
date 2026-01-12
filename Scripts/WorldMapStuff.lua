@@ -1,16 +1,17 @@
 --Settings
-local shuffle_portals = false
+local shuffle_portals = true
 local portal_set_seed = true
 local shuffle_et = false
 local shuffle_beaches = true
 local shuffle_workshop = true
-local funny_portals = true
+local funny_portals = false
 local random_names = false --placeholder var, will update so that only unentered maps will have random names
 
 --vars
 local portal_transform_array = {}
+local shuffled_portals = {}
 local wm_exit
-local last_entered -- used for painting workshop and gestral beaches
+local last_entered = "" -- used for painting workshop and gestral beaches
 local already_shuffled
 local hooks_registered = false
 
@@ -34,26 +35,31 @@ function GetPortalLoop()
         end)
 end
 
-local function_name = "/Game/jRPGTemplate/Blueprints/Basics/FL_jRPG_CustomFunctionLibrary.FL_jRPG_CustomFunctionLibrary_C:GetCurrentLevelData"
-RegisterHook(function_name, function (self, _worldContext, found, levelData, rowName)
-    local name = rowName:get()
-    local level = name:ToString()
-    --local level = rowName:get():ToString()
-    already_shuffled = false
-    if not hooks_registered and level == "WorldMap" then
-        Register_ShuffleAndTeleport()
-        Register_SaveLastEnteredPortal()
-        hooks_registered = true
-    end
-    
-end)
+
+    local function_name = "/Game/jRPGTemplate/Blueprints/Basics/FL_jRPG_CustomFunctionLibrary.FL_jRPG_CustomFunctionLibrary_C:GetCurrentLevelData"
+    RegisterHook(function_name, function (self, _worldContext, found, levelData, rowName)
+        local name = rowName:get()
+        local level = name:ToString()
+        --local level = rowName:get():ToString()
+        already_shuffled = false
+        if not hooks_registered and level == "WorldMap" then
+            Register_ShuffleAndTeleport()
+            Register_SaveLastEnteredPortal()
+            hooks_registered = true
+        end
+        
+    end)
+
+
 
 function Register_ShuffleAndTeleport()
     RegisterHook("/Game/Gameplay/WorldMap/BP_PlayerController_WorldMap.BP_PlayerController_WorldMap_C:UnpauseGameplay", function ()
         
 
         GetPortalLoop()
-        local shuffled_portals = ShufflePortals(portal_transform_array, shuffle_et, true)
+        if shuffled_portals == nil then
+            shuffled_portals = ShufflePortals(portal_transform_array, shuffle_et, true)
+        end
         if not shuffle_portals or already_shuffled then goto break_loop end
         for k,v in pairs(shuffled_portals) do
             print(k.. " randomised to " .. v[1].DestinationSpawnPointTag.TagName:ToString())
@@ -315,7 +321,7 @@ function TeleportPlayer(destination)
         return 
     end
     --increase height so player doesn't clip into the map 
-    teleport_loc.Z = teleport_loc.Z + 700
+    teleport_loc.Z = teleport_loc.Z + 10000
 
     local teleport_rot = portal_transform_array[destination][3]
     --adjust player position to be in front of portal
@@ -324,12 +330,16 @@ function TeleportPlayer(destination)
         X=portal_transform_array[destination][1]:GetActorForwardVector().X,
         Y=portal_transform_array[destination][1]:GetActorForwardVector().Y,
     }
-    
-    local scale_factor = 1500
-    teleport_loc.X = teleport_loc.X + xy_forward_vector.X * scale_factor
-    teleport_loc.Y = teleport_loc.Y + xy_forward_vector.Y * scale_factor
+    if string.find(last_entered,"CleaWorkshop") then
+        local scale_factor = 1500
+        teleport_loc.X = teleport_loc.X + xy_forward_vector.X * scale_factor
+        teleport_loc.Y = teleport_loc.Y + xy_forward_vector.Y * scale_factor
+    end
 
     player_pawn:K2_SetActorLocationAndRotation(teleport_loc,teleport_rot,false,{},true)
+
+    teleport_loc.Z = teleport_loc.Z - 9500
+    player_pawn:K2_SetActorLocationAndRotation(teleport_loc,teleport_rot,false,{},false)
 end
 
 
@@ -374,9 +384,3 @@ RegisterHook("/Game/UI/Widgets/HUD_Exploration/WorldMap/WBP_LevelNameWidget.WBP_
 
 end)
 
---[[RegisterHook("/Game/UI/Widgets/HUD_Exploration/WorldMap/WBP_LevelNameWidget.WBP_LevelNameWidget_C:PlayDisappearAnimation", function(self)
-    local level_text = self:get() ---@type WBP_LevelNameWidget_C
-    level_text.TextBlock_LevelName.Font.Size = 50
-
-
-end)]]

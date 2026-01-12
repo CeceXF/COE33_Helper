@@ -1,5 +1,6 @@
 --Settings
 local scale_to_party = true
+local dynamic_scaling = true -- makes enemies easier if you kill them faster, makes enemies harder if you kill them slower
 local scale_down_only = false
 local scale_up_only = false
 local factor = 1.1
@@ -8,7 +9,8 @@ local randomise_enemies = true
 local randomise_every_encounter = false --random enemies every encounter
 local keep_bosses_in_boss_encounters = true
 local include_cut_content = false
-local randomise_swc_renoir = true -- so u dont need to potentially fight simon as 1hp level 1 gustave
+local randomise_swc_renoir_encounter = true -- so u dont need to potentially fight simon as 1hp level 1 gustave
+local include_a3_renoir = true --prevents access through opera house curtains, u need to patch ur save file to reopen them
 local include_white_nevron_enemies = false
 local randomise_white_nevron_encounters = false
 local randomise_adds = false --affects summon petank, chromatic petank, renoir 1, danseuse, chromatic danseuse
@@ -39,6 +41,8 @@ local enemy_categories = JSON.read_file("ue4ss/Mods/COE33_Helper/Scripts/data/En
 local enemies = {}
 local bosses = {}
 local enemies_shuffled = false
+local number_of_turns = 0
+
 
 
 
@@ -60,12 +64,6 @@ RegisterHook("/Game/jRPGTemplate/Blueprints/Components/AC_jRPG_BattleManager.AC_
         print(enemy:get():GetFullName())
         --print(enemy:get():IsValid())
     end)
-    
-
-
-
-    
-    
 
 end)
 
@@ -104,12 +102,139 @@ RegisterHook("/Game/jRPGTemplate/Blueprints/Components/AC_jRPG_BattleManager.AC_
         battle_manager.CurrentBattleEncounterLevel = change_to
 
     end
-
-    
-
-    
-
 end)
+
+RegisterHook("/Game/jRPGTemplate/Blueprints/Components/AC_jRPG_BattleManager.AC_jRPG_BattleManager_C:StartCharacterTurn", function (self, Character)
+    local name = Character:get():GetFullName()
+    --print(name)
+    local chars = {"Verso","Noah","Monoco","Sciel","Lune","Maelle"}
+    for i,character in ipairs(chars) do
+        if string.find(name, "BP_"..character.."Battle") then
+            number_of_turns = number_of_turns + 1
+        end
+    end
+end)
+
+RegisterHook("/Game/jRPGTemplate/Blueprints/Components/AC_jRPG_BattleManager.AC_jRPG_BattleManager_C:OnBattleEndVictory",function ()
+    if dynamic_scaling then
+        if number_of_turns <= 5 then
+            factor = factor + 0.05
+        elseif number_of_turns > 15 then
+            factor = factor - 0.05
+        end
+    end
+    --print(factor)
+end)
+
+function PopulateEnemies()
+    for i, enemy in ipairs(enemy_categories["regular enemies"]) do
+        table.insert(enemies,{enemy,enemy_dt:FindRow(enemy)})
+    end
+
+    if include_cut_content then
+        for i, enemy in ipairs(enemy_categories["cut regular enemies"]) do
+            table.insert(enemies,{enemy,enemy_dt:FindRow(enemy)})
+        end
+    end
+
+    if include_white_nevron_enemies then
+        for i, enemy in ipairs(enemy_categories["white nevrons"]) do
+            table.insert(enemies,{enemy,enemy_dt:FindRow(enemy)})
+        end
+    end
+
+    if include_petank_enemies then 
+        for i, enemy in ipairs(enemy_categories["petanks"]) do
+            table.insert(enemies,{enemy,enemy_dt:FindRow(enemy)})
+        end
+    end
+
+    if not mimes_are_bosses and include_mime_enemies then
+        for i, enemy in ipairs(enemy_categories["mimes"]) do
+            table.insert(enemies,{enemy,enemy_dt:FindRow(enemy)})
+        end
+    end
+
+    if include_merchant_enemies then 
+        for i, enemy in ipairs(enemy_categories["merchants"]) do
+            table.insert(enemies,{enemy,enemy_dt:FindRow(enemy)})
+        end
+    end
+
+end
+
+function PopulateBosses ()
+    for i, boss in ipairs(enemy_categories["minibosses"]) do 
+        table.insert(bosses, {boss,enemy_dt:FindRow(boss)})
+    end
+
+    for i, boss in ipairs(enemy_categories["chromatics"]) do 
+        table.insert(bosses, {boss,enemy_dt:FindRow(boss)})
+    end
+
+    for i, boss in ipairs(enemy_categories["bosses"]) do
+        if include_a3_renoir or not string.find(boss,"L_Boss_Curator") then
+            table.insert(bosses, {boss,enemy_dt:FindRow(boss)})
+        end
+    end
+
+
+    if include_cut_content then
+        for i, boss in ipairs(enemy_categories["cut content bosses"]) do 
+            table.insert(bosses, {boss,enemy_dt:FindRow(boss)})
+        end
+    end
+
+    if include_superbosses_except_duo then 
+        for i, boss in ipairs(enemy_categories["superbosses"]) do 
+            table.insert(bosses, {boss,enemy_dt:FindRow(boss)})
+        end
+    end
+
+    if include_duolliste then
+        for i, boss in ipairs(enemy_categories["duollistes"]) do 
+            table.insert(bosses, {boss,enemy_dt:FindRow(boss)})
+        end
+    end
+
+    if include_mime_enemies then 
+        if mimes_are_bosses then
+            for i, boss in ipairs(enemy_categories["mimes"]) do
+                table.insert(bosses,{boss,enemy_dt:FindRow(boss)})
+            end                
+        end            
+    end
+
+    if include_tutorial_enemies then 
+        for i, boss in ipairs(enemy_categories["tutorials"]) do
+            table.insert(bosses,{boss,enemy_dt:FindRow(boss)})
+        end
+    end
+
+    if include_gimmick_enemies then 
+        for i, boss in ipairs(enemy_categories["gimmicks"]) do
+            table.insert(bosses,{boss,enemy_dt:FindRow(boss)})
+        end
+        
+    end
+end
+
+function RefillEnemyList()
+    local enemies_temp = {}
+    for i,enemy in ipairs(enemies) do
+        table.insert(enemies_temp,enemy)
+    end
+    return enemies_temp
+end
+
+function RefillBossList()
+    local bosses_temp = {}
+    for i,boss in ipairs(bosses) do
+        table.insert(bosses_temp,boss)
+    end
+    return bosses_temp
+end
+
 
 RegisterHook("/Game/jRPGTemplate/Datatables/BP_FunctionLibrary_DT_Enemies_Accessor.BP_FunctionLibrary_DT_Enemies_Accessor_C:GetEncounterDataTableRow", function (self, RowName, _WorldContext, Found, EnemyData)
 
@@ -144,87 +269,10 @@ RegisterHook("/Game/jRPGTemplate/Datatables/BP_FunctionLibrary_DT_Enemies_Access
             return
         end
 
-        for i, enemy in ipairs(enemy_categories["regular enemies"]) do
-            table.insert(enemies,{enemy,enemy_dt:FindRow(enemy)})
-        end
+        PopulateEnemies()
+        PopulateBosses()
 
-        for i, boss in ipairs(enemy_categories["minibosses"]) do 
-            table.insert(bosses, {boss,enemy_dt:FindRow(boss)})
-        end
-
-        for i, boss in ipairs(enemy_categories["chromatics"]) do 
-            table.insert(bosses, {boss,enemy_dt:FindRow(boss)})
-        end
-
-        for i, boss in ipairs(enemy_categories["bosses"]) do 
-            table.insert(bosses, {boss,enemy_dt:FindRow(boss)})
-        end
-
-        if include_cut_content then
-            for i, enemy in ipairs(enemy_categories["cut regular enemies"]) do
-                table.insert(enemies,{enemy,enemy_dt:FindRow(enemy)})
-            end
-
-            for i, boss in ipairs(enemy_categories["cut content bosses"]) do 
-                table.insert(bosses, {boss,enemy_dt:FindRow(boss)})
-            end
-        end
-
-        if include_white_nevron_enemies then
-            for i, enemy in ipairs(enemy_categories["white nevrons"]) do
-                table.insert(enemies,{enemy,enemy_dt:FindRow(enemy)})
-            end
-        end
-
-        if include_superbosses_except_duo then 
-            for i, boss in ipairs(enemy_categories["superbosses"]) do 
-                table.insert(bosses, {boss,enemy_dt:FindRow(boss)})
-            end
-        end
-
-        if include_duolliste then
-            for i, boss in ipairs(enemy_categories["duollistes"]) do 
-                table.insert(bosses, {boss,enemy_dt:FindRow(boss)})
-            end
-        end
-
-        if include_petank_enemies then 
-            for i, enemy in ipairs(enemy_categories["petanks"]) do
-                table.insert(enemies,{enemy,enemy_dt:FindRow(enemy)})
-            end
-        end
-
-        if include_mime_enemies then 
-            if mimes_are_bosses then
-                for i, boss in ipairs(enemy_categories["mimes"]) do
-                    table.insert(bosses,{boss,enemy_dt:FindRow(boss)})
-                end
-            else 
-                for i, enemy in ipairs(enemy_categories["mimes"]) do
-                    table.insert(enemies,{enemy,enemy_dt:FindRow(enemy)})
-                end
-            end
-            
-        end
-
-        if include_tutorial_enemies then 
-            for i, boss in ipairs(enemy_categories["tutorials"]) do
-                table.insert(bosses,{boss,enemy_dt:FindRow(boss)})
-            end
-        end
-
-        if include_gimmick_enemies then 
-            for i, boss in ipairs(enemy_categories["gimmicks"]) do
-                table.insert(bosses,{boss,enemy_dt:FindRow(boss)})
-            end
-            
-        end
-
-        if randomise_merchant_encounters then 
-            for i, enemy in ipairs(enemy_categories["merchants"]) do
-                table.insert(enemies,{enemy,enemy_dt:FindRow(enemy)})
-            end
-        end
+ 
 
         print("Enemy Datatable get :3")
 
@@ -279,16 +327,27 @@ RegisterHook("/Game/jRPGTemplate/Datatables/BP_FunctionLibrary_DT_Enemies_Access
             end
         end
 
+        local enemies_temp = {}
+        local bosses_temp = {}
+
         enemy_dt:ForEachRow(function(enemy_name,enemy_data)
             local index
             local random_new_enemy
-            if keep_bosses_in_boss_encounters and (enemy_data.IsBoss_46_F2839289483FE917FB914594C70C7CE4 or (mimes_are_bosses and string.find(enemy_name,"Mime")) or string.find(string.lower(enemy_name),"alpha")) then
-                index = math.random(#bosses)
-                random_new_enemy = bosses[index][1]
+            if #enemies_temp == 0 then
+                enemies_temp = RefillEnemyList()
+            end
+            if #bosses_temp == 0 then
+                bosses_temp = RefillBossList()
+            end
 
+            if keep_bosses_in_boss_encounters and (enemy_data.IsBoss_46_F2839289483FE917FB914594C70C7CE4 or (mimes_are_bosses and string.find(enemy_name,"Mime")) or string.find(string.lower(enemy_name),"alpha")) then
+                index = math.random(#bosses_temp)
+                random_new_enemy = bosses_temp[index][1]
+                table.remove(bosses_temp,index)
             else
-                index = math.random(#enemies)
-                random_new_enemy = enemies[index][1]
+                index = math.random(#enemies_temp)
+                random_new_enemy = enemies_temp[index][1]
+                table.remove(enemies_temp,index)
             end
 
             --print("COE33 Encounter - New Enemy: "..random_new_enemy)
@@ -305,9 +364,11 @@ RegisterHook("/Game/jRPGTemplate/Datatables/BP_FunctionLibrary_DT_Enemies_Access
             local check_merchant_encounter = randomise_merchant_encounters or not string.find(merchant_str,enemy_name)
             
             if enemy_name == "SC_MirrorRenoir_GustaveEnd" then
-                if randomise_swc_renoir then
+                if randomise_swc_renoir_encounter then
                     enemy_dt:AddRow(enemy_name,new_enemy_row)
                 end
+            elseif enemy_name =="L_Boss_Curator" then
+
             
             elseif check_adds or check_white_nevron_encounter or check_supers_encounter or check_duo_encounter or check_mime_encounter or check_petank_encounter or check_tuto_encounter or check_gimmick_encounter or check_merchant_encounter then
                 enemy_dt:AddRow(enemy_name,new_enemy_row)            
@@ -324,6 +385,10 @@ RegisterHook("/Game/jRPGTemplate/Datatables/BP_FunctionLibrary_DT_Enemies_Access
 
 end)
 
+--coward button
+RegisterKeyBind(Key.F6, {ModifierKey.CONTROL}, function ()
+    enemies_shuffled = false
+end)
 
 
 

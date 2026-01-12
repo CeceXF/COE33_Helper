@@ -1,6 +1,8 @@
 # Prerequisites
 You will need the [experimental version of UE4SS](https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/experimental-latest)
 
+Optional: Does not come included with the AP mod for E33. Install that first then this mod if you're using it.
+
 # WorldMapStuff.lua
 Disabled by default.
 

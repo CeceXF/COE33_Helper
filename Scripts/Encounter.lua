@@ -63,33 +63,30 @@ RegisterHook("/Game/jRPGTemplate/Blueprints/Components/AC_jRPG_BattleManager.AC_
     end)
 
 
-    if not hooks_registered then
-
-        RegisterHook("/Game/jRPGTemplate/Blueprints/Components/AC_jRPG_BattleManager.AC_jRPG_BattleManager_C:StartCharacterTurn", function (self, Character)
-            local name = Character:get():GetFullName()
-            --print(name)
-            local chars = {"Verso","Noah","Monoco","Sciel","Lune","Maelle"}
-            for i,character in ipairs(chars) do
-                if string.find(name, "BP_"..character.."Battle") then
-                    number_of_turns = number_of_turns + 1
-                end
-            end
-        end)
-
-        RegisterHook("/Game/jRPGTemplate/Blueprints/Components/AC_jRPG_BattleManager.AC_jRPG_BattleManager_C:OnBattleEndVictory",function ()
-            if dynamic_scaling then
-                if number_of_turns <= 5 then
-                    factor = factor + 0.05
-                elseif number_of_turns > 15 then
-                    factor = factor - 0.05
-                end
-            end
-            --print(factor)
-        end)
-        hooks_registered = true
-      
+    
+end)
+RegisterHook("/Game/jRPGTemplate/Blueprints/Components/AC_jRPG_BattleManager.AC_jRPG_BattleManager_C:StartCharacterTurn", function (self, Character)
+    local name = Character:get():GetFullName()
+    --print(name)
+    local chars = {"Verso","Noah","Monoco","Sciel","Lune","Maelle"}
+    for i,character in ipairs(chars) do
+        if string.find(name, "BP_"..character.."Battle") then
+            number_of_turns = number_of_turns + 1
+        end
     end
 end)
+
+RegisterHook("/Game/jRPGTemplate/Blueprints/Components/AC_jRPG_BattleManager.AC_jRPG_BattleManager_C:OnBattleEndVictory",function ()
+    if dynamic_scaling then
+        if number_of_turns <= 5 then
+            factor = factor + 0.05
+        elseif number_of_turns > 15 then
+            factor = factor - 0.05
+        end
+    end
+    --print(factor)
+end)
+hooks_registered = true
 
 RegisterHook("/Game/jRPGTemplate/Blueprints/Components/AC_jRPG_BattleManager.AC_jRPG_BattleManager_C:LoadEncounterSettings", function (self, ...)
     local battle_manager = self:get() ---@type UAC_jRPG_BattleManager_C

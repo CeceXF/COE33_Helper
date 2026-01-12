@@ -42,10 +42,7 @@ local enemies = {}
 local bosses = {}
 local enemies_shuffled = false
 local number_of_turns = 0
-
-
-
-
+local hooks_registered = false
 
 
 RegisterHook("/Game/jRPGTemplate/Blueprints/Components/AC_jRPG_BattleManager.AC_jRPG_BattleManager_C:StartBattle", function (self, ...)
@@ -65,6 +62,33 @@ RegisterHook("/Game/jRPGTemplate/Blueprints/Components/AC_jRPG_BattleManager.AC_
         --print(enemy:get():IsValid())
     end)
 
+
+    if not hooks_registered then
+
+        RegisterHook("/Game/jRPGTemplate/Blueprints/Components/AC_jRPG_BattleManager.AC_jRPG_BattleManager_C:StartCharacterTurn", function (self, Character)
+            local name = Character:get():GetFullName()
+            --print(name)
+            local chars = {"Verso","Noah","Monoco","Sciel","Lune","Maelle"}
+            for i,character in ipairs(chars) do
+                if string.find(name, "BP_"..character.."Battle") then
+                    number_of_turns = number_of_turns + 1
+                end
+            end
+        end)
+
+        RegisterHook("/Game/jRPGTemplate/Blueprints/Components/AC_jRPG_BattleManager.AC_jRPG_BattleManager_C:OnBattleEndVictory",function ()
+            if dynamic_scaling then
+                if number_of_turns <= 5 then
+                    factor = factor + 0.05
+                elseif number_of_turns > 15 then
+                    factor = factor - 0.05
+                end
+            end
+            --print(factor)
+        end)
+        hooks_registered = true
+      
+    end
 end)
 
 RegisterHook("/Game/jRPGTemplate/Blueprints/Components/AC_jRPG_BattleManager.AC_jRPG_BattleManager_C:LoadEncounterSettings", function (self, ...)
@@ -104,27 +128,7 @@ RegisterHook("/Game/jRPGTemplate/Blueprints/Components/AC_jRPG_BattleManager.AC_
     end
 end)
 
-RegisterHook("/Game/jRPGTemplate/Blueprints/Components/AC_jRPG_BattleManager.AC_jRPG_BattleManager_C:StartCharacterTurn", function (self, Character)
-    local name = Character:get():GetFullName()
-    --print(name)
-    local chars = {"Verso","Noah","Monoco","Sciel","Lune","Maelle"}
-    for i,character in ipairs(chars) do
-        if string.find(name, "BP_"..character.."Battle") then
-            number_of_turns = number_of_turns + 1
-        end
-    end
-end)
 
-RegisterHook("/Game/jRPGTemplate/Blueprints/Components/AC_jRPG_BattleManager.AC_jRPG_BattleManager_C:OnBattleEndVictory",function ()
-    if dynamic_scaling then
-        if number_of_turns <= 5 then
-            factor = factor + 0.05
-        elseif number_of_turns > 15 then
-            factor = factor - 0.05
-        end
-    end
-    --print(factor)
-end)
 
 function PopulateEnemies()
     for i, enemy in ipairs(enemy_categories["regular enemies"]) do

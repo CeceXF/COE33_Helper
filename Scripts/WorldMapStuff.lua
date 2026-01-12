@@ -1,6 +1,7 @@
 --Settings
 local shuffle_portals = true
 local portal_set_seed = true
+local portal_seed = 33
 local shuffle_et = false
 local shuffle_beaches = true
 local shuffle_workshop = true
@@ -36,19 +37,19 @@ function GetPortalLoop()
 end
 
 
-    local function_name = "/Game/jRPGTemplate/Blueprints/Basics/FL_jRPG_CustomFunctionLibrary.FL_jRPG_CustomFunctionLibrary_C:GetCurrentLevelData"
-    RegisterHook(function_name, function (self, _worldContext, found, levelData, rowName)
-        local name = rowName:get()
-        local level = name:ToString()
-        --local level = rowName:get():ToString()
-        already_shuffled = false
-        if not hooks_registered and level == "WorldMap" then
-            Register_ShuffleAndTeleport()
-            Register_SaveLastEnteredPortal()
-            hooks_registered = true
-        end
-        
-    end)
+local function_name = "/Game/jRPGTemplate/Blueprints/Basics/FL_jRPG_CustomFunctionLibrary.FL_jRPG_CustomFunctionLibrary_C:GetCurrentLevelData"
+RegisterHook(function_name, function (self, _worldContext, found, levelData, rowName)
+    local name = rowName:get()
+    local level = name:ToString()
+    --local level = rowName:get():ToString()
+    already_shuffled = false
+    if not hooks_registered and level == "WorldMap" then
+        Register_ShuffleAndTeleport()
+        Register_SaveLastEnteredPortal()
+        hooks_registered = true
+    end
+    
+end)
 
 
 
@@ -57,7 +58,7 @@ function Register_ShuffleAndTeleport()
         
 
         GetPortalLoop()
-        if shuffled_portals == nil then
+        if #shuffled_portals == 0 then
             shuffled_portals = ShufflePortals(portal_transform_array, shuffle_et, true)
         end
         if not shuffle_portals or already_shuffled then goto break_loop end
@@ -146,7 +147,7 @@ function ShufflePortals(portals,shuffle_et,include_endgame_areas)
     local portal_shuffle_seed
 
     if portal_set_seed then
-        portal_shuffle_seed = 33
+        portal_shuffle_seed = portal_seed
     else 
         portal_shuffle_seed = math.random(999)
     end
@@ -338,8 +339,8 @@ function TeleportPlayer(destination)
 
     player_pawn:K2_SetActorLocationAndRotation(teleport_loc,teleport_rot,false,{},true)
 
-    teleport_loc.Z = teleport_loc.Z - 9500
-    player_pawn:K2_SetActorLocationAndRotation(teleport_loc,teleport_rot,false,{},false)
+    --teleport_loc.Z = teleport_loc.Z - 9500
+    --player_pawn:K2_SetActorLocationAndRotation(teleport_loc,teleport_rot,false,{},false)
 end
 
 

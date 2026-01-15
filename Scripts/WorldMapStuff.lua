@@ -27,6 +27,8 @@ function GetPortalLoop()
             portal = portal:get()
             --local name = portal.LevelDestination.RowName:ToString()
             local destination_name = portal.DestinationSpawnPointTag.TagName:ToString()
+            local scene = portal.Scene:GetFullName()
+            print(scene)
             --print(destination_name)
             --local return_name = portal.ReturnSpawnPointTag.TagName:ToString()
             --print("COE33 Portal Name: ".. name)
@@ -207,7 +209,7 @@ function ShufflePortals(portals,shuffle_et,include_endgame_areas)
             end
         end
 
-        if string.find(key,"MonocoStation") or (string.find(key,"CleasTower") and not shuffle_et) or string.find(key,"SpringMeadows")  or (string.find(key,"CleaWorkshop") and not shuffle_workshop) or (string.find(key,"GestralBeach") and not shuffle_beaches)then
+        if string.find(key,"MonocoStation") or (string.find(key,"CleasTower") and not shuffle_et) or string.find(key,"SpringMeadows")  or (string.find(key,"CleaWorkshop") and not shuffle_workshop) or (string.find(key,"GestralBeach") and not shuffle_beaches) or string.find(key,"Verso") or string.find(key,"AxonPath") then
             goto continue
         else 
             one_entrance[#one_entrance+1] = {key,value}

@@ -9,8 +9,8 @@ local randomise_enemies = true
 local randomise_every_encounter = false --random enemies every encounter
 local keep_bosses_in_boss_encounters = true
 local include_cut_content = false
-local randomise_swc_renoir_encounter = true -- so u dont need to potentially fight simon as 1hp level 1 gustave
-local include_a3_renoir = true --prevents access through opera house curtains, u need to patch ur save file to reopen them
+local randomise_swc_renoir_encounter = false -- so u dont need to potentially fight simon as 1hp level 1 gustave
+--local include_a3_renoir = true -- (not implemented yet) prevents access through opera house curtains, u need to patch ur save file to reopen them
 local include_white_nevron_enemies = false
 local randomise_white_nevron_encounters = false
 local randomise_adds = false --affects summon petank, chromatic petank, renoir 1, danseuse, chromatic danseuse
@@ -86,7 +86,7 @@ RegisterHook("/Game/jRPGTemplate/Blueprints/Components/AC_jRPG_BattleManager.AC_
     end
     --print(factor)
 end)
-hooks_registered = true
+
 
 RegisterHook("/Game/jRPGTemplate/Blueprints/Components/AC_jRPG_BattleManager.AC_jRPG_BattleManager_C:LoadEncounterSettings", function (self, ...)
     local battle_manager = self:get() ---@type UAC_jRPG_BattleManager_C
@@ -377,9 +377,6 @@ RegisterHook("/Game/jRPGTemplate/Datatables/BP_FunctionLibrary_DT_Enemies_Access
                 if randomise_swc_renoir_encounter then
                     enemy_dt:AddRow(enemy_name,new_enemy_row)
                 end
-            elseif enemy_name =="L_Boss_Curator" then
-
-            
             elseif check_adds or check_white_nevron_encounter or check_supers_encounter or check_duo_encounter or check_mime_encounter or check_petank_encounter or check_tuto_encounter or check_gimmick_encounter or check_merchant_encounter then
                 enemy_dt:AddRow(enemy_name,new_enemy_row)            
             end

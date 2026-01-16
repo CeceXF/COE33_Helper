@@ -3,7 +3,7 @@ local scale_to_party = true
 local dynamic_scaling = true -- makes enemies easier if you kill them faster, makes enemies harder if you kill them slower
 local scale_down_only = false
 local scale_up_only = false
-local factor = 1.1
+local factor = 1
 
 local randomise_enemies = true
 local randomise_every_encounter = false --random enemies every encounter
@@ -14,21 +14,22 @@ local randomise_swc_renoir_encounter = false -- so u dont need to potentially fi
 local include_white_nevron_enemies = false
 local randomise_white_nevron_encounters = false
 local randomise_adds = false --affects summon petank, chromatic petank, renoir 1, danseuse, chromatic danseuse
-local include_superbosses_except_duo = true
+local include_superbosses_except_duo = false
 local randomise_superboss_encounters_except_duo = false
 local include_duolliste = false -- buggy -  they dont die properly allegedly
 local randomise_duolliste_encounter = false
 local include_mime_enemies = false
-local randomise_mime_encounters = true
+local randomise_mime_encounters = false
 local mimes_are_bosses = true -- forces a boss into mime encounters
 local include_petank_enemies = true
-local randomise_petank_encounters = true
+local randomise_petank_encounters = false
 local include_tutorial_enemies = false
 local randomise_tutorial_encounters = true --doesnt do anything if you have tutorials turned off
 local include_gimmick_enemies = false
 local randomise_gimmick_encounters = false
 local include_merchant_enemies = false
 local randomise_merchant_encounters = false --you wont be able to unlock their inventory unless you actually defeat them when you find them elsewhere
+-- oops all bosses
 --check how to change opera house curtain state
 
 
@@ -377,7 +378,7 @@ RegisterHook("/Game/jRPGTemplate/Datatables/BP_FunctionLibrary_DT_Enemies_Access
                 if randomise_swc_renoir_encounter then
                     enemy_dt:AddRow(enemy_name,new_enemy_row)
                 end
-            elseif check_adds or check_white_nevron_encounter or check_supers_encounter or check_duo_encounter or check_mime_encounter or check_petank_encounter or check_tuto_encounter or check_gimmick_encounter or check_merchant_encounter then
+            elseif check_adds and check_white_nevron_encounter and check_supers_encounter and check_duo_encounter and check_mime_encounter and check_petank_encounter and check_tuto_encounter and check_gimmick_encounter and check_merchant_encounter then
                 enemy_dt:AddRow(enemy_name,new_enemy_row)            
             end
 

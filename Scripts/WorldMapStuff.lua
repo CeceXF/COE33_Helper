@@ -13,11 +13,11 @@ local portal_transform_array = {}
 local shuffled_portals = {}
 local wm_exit
 local last_entered = "" -- used for painting workshop and gestral beaches
-local already_shuffled = false
+--local already_shuffled = false
 local hooks_registered = false
 
 
-if not shuffle_portals then
+if shuffle_portals then
     function GetPortalLoop()
         local a = FindFirstOf("BP_WorldInfoComponent_C") ---@cast a UBP_WorldInfoComponent_C
             if a == nil or not a:IsValid() then return end
@@ -64,14 +64,14 @@ if not shuffle_portals then
             if #shuffled_portals == 0 then
                 shuffled_portals = ShufflePortals(portal_transform_array, shuffle_et, true)
             end
-            if already_shuffled then goto skip_loop end
+
             for k,v in pairs(shuffled_portals) do
                 print(k.. " randomised to " .. v[1].DestinationSpawnPointTag.TagName:ToString())
                 if funny_portals then portal_transform_array[k][1]:K2_SetActorLocationAndRotation(v[2].Translation,v[2].Rotation,false,{},true)
                 else portal_transform_array[k][1]:K2_SetActorTransform(v[2],false,{},true) end
                 
             end
-            
+
             if wm_exit ~= nil then
                 --exceptions
                 if wm_exit[1] == "FloatingCemetery" then wm_exit[1] = "Cemetery" 
@@ -116,7 +116,7 @@ if not shuffle_portals then
                 if wm_exit ~= nil then print("COE33 WorldMapStuff: Unknown Location Specified - "..wm_exit[1]) end
             end
             ::skip_loop::
-            already_shuffled = true
+            
         end)
     end
 

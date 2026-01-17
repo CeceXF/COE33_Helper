@@ -1,9 +1,9 @@
 --Settings
-local shuffle_portals = true
+local shuffle_portals = false
 local portal_set_seed = true
 local portal_seed = 33
 local shuffle_et = false
-local shuffle_beaches = true
+local shuffle_beaches = false
 local shuffle_workshop = true
 local funny_portals = false
 local random_names = false --placeholder var, will update so that only unentered maps will have random names
@@ -16,374 +16,376 @@ local last_entered = "" -- used for painting workshop and gestral beaches
 local already_shuffled = false
 local hooks_registered = false
 
-function GetPortalLoop()
-    local a = FindFirstOf("BP_WorldInfoComponent_C") ---@cast a UBP_WorldInfoComponent_C
-        if a == nil or not a:IsValid() then return end
 
-        local portal_array = a.WorldTeleportPoints
+if not shuffle_portals then
+    function GetPortalLoop()
+        local a = FindFirstOf("BP_WorldInfoComponent_C") ---@cast a UBP_WorldInfoComponent_C
+            if a == nil or not a:IsValid() then return end
 
-        portal_array:ForEach(function(_, portal)
-        
-            portal = portal:get()
-            --local name = portal.LevelDestination.RowName:ToString()
-            local destination_name = portal.DestinationSpawnPointTag.TagName:ToString()
-            local scene = portal.Scene:GetFullName()
-            print(scene)
-            --print(destination_name)
-            --local return_name = portal.ReturnSpawnPointTag.TagName:ToString()
-            --print("COE33 Portal Name: ".. name)
-            print("COE33 Portal Destination: ".. destination_name)
-            --print("COE33 Portal Return: ".. return_name)
-            portal_transform_array[destination_name] = {portal,portal:GetTransform()}
-        end)
-end
+            local portal_array = a.WorldTeleportPoints
 
-
-local function_name = "/Game/jRPGTemplate/Blueprints/Basics/FL_jRPG_CustomFunctionLibrary.FL_jRPG_CustomFunctionLibrary_C:GetCurrentLevelData"
-RegisterHook(function_name, function (self, _worldContext, found, levelData, rowName)
-    local name = rowName:get()
-    local level = name:ToString()
-    --local level = rowName:get():ToString()
-    if not hooks_registered and level == "WorldMap" then
-        Register_ShuffleAndTeleport()
-        Register_SaveLastEnteredPortal()
-        hooks_registered = true
-    end
-    
-end)
-
-
-
-function Register_ShuffleAndTeleport()
-    RegisterHook("/Game/Gameplay/WorldMap/BP_PlayerController_WorldMap.BP_PlayerController_WorldMap_C:UnpauseGameplay", function ()
-        
-
-        GetPortalLoop()
-        if #shuffled_portals == 0 then
-            shuffled_portals = ShufflePortals(portal_transform_array, shuffle_et, true)
-        end
-        if not shuffle_portals or already_shuffled then goto break_loop end
-        for k,v in pairs(shuffled_portals) do
-            print(k.. " randomised to " .. v[1].DestinationSpawnPointTag.TagName:ToString())
-            if funny_portals then portal_transform_array[k][1]:K2_SetActorLocationAndRotation(v[2].Translation,v[2].Rotation,false,{},true)
-            else portal_transform_array[k][1]:K2_SetActorTransform(v[2],false,{},true) end
+            portal_array:ForEach(function(_, portal)
             
+                portal = portal:get()
+                --local name = portal.LevelDestination.RowName:ToString()
+                local destination_name = portal.DestinationSpawnPointTag.TagName:ToString()
+                local scene = portal.Scene:GetFullName()
+                print(scene)
+                --print(destination_name)
+                --local return_name = portal.ReturnSpawnPointTag.TagName:ToString()
+                --print("COE33 Portal Name: ".. name)
+                print("COE33 Portal Destination: ".. destination_name)
+                --print("COE33 Portal Return: ".. return_name)
+                portal_transform_array[destination_name] = {portal,portal:GetTransform()}
+            end)
+    end
+
+
+    local function_name = "/Game/jRPGTemplate/Blueprints/Basics/FL_jRPG_CustomFunctionLibrary.FL_jRPG_CustomFunctionLibrary_C:GetCurrentLevelData"
+    RegisterHook(function_name, function (self, _worldContext, found, levelData, rowName)
+        local name = rowName:get()
+        local level = name:ToString()
+        --local level = rowName:get():ToString()
+        if not hooks_registered and level == "WorldMap" then
+            Register_ShuffleAndTeleport()
+            Register_SaveLastEnteredPortal()
+            hooks_registered = true
         end
         
-        if wm_exit ~= nil then
-            --exceptions
-            if wm_exit[1] == "FloatingCemetery" then wm_exit[1] = "Cemetery" 
-            elseif wm_exit[1] == "MonocoStationOldLumiere" then wm_exit[1] = "MonocoStation.OldLumiere"
-            elseif wm_exit[1] == "MonocoStationForgotten" then wm_exit[1] = "MonocoStation.Forgotten"
-            elseif wm_exit[1] == "MonocoStationFrozenHearts" then wm_exit[1] = "MonocoStation.FrozenHearts"
+    end)
 
 
+
+    function Register_ShuffleAndTeleport()
+        RegisterHook("/Game/Gameplay/WorldMap/BP_PlayerController_WorldMap.BP_PlayerController_WorldMap_C:UnpauseGameplay", function ()
+            
+
+            GetPortalLoop()
+            if #shuffled_portals == 0 then
+                shuffled_portals = ShufflePortals(portal_transform_array, shuffle_et, true)
             end
-
+            if already_shuffled then goto skip_loop end
             for k,v in pairs(shuffled_portals) do
+                print(k.. " randomised to " .. v[1].DestinationSpawnPointTag.TagName:ToString())
+                if funny_portals then portal_transform_array[k][1]:K2_SetActorLocationAndRotation(v[2].Translation,v[2].Rotation,false,{},true)
+                else portal_transform_array[k][1]:K2_SetActorTransform(v[2],false,{},true) end
+                
+            end
+            
+            if wm_exit ~= nil then
+                --exceptions
+                if wm_exit[1] == "FloatingCemetery" then wm_exit[1] = "Cemetery" 
+                elseif wm_exit[1] == "MonocoStationOldLumiere" then wm_exit[1] = "MonocoStation.OldLumiere"
+                elseif wm_exit[1] == "MonocoStationForgotten" then wm_exit[1] = "MonocoStation.Forgotten"
+                elseif wm_exit[1] == "MonocoStationFrozenHearts" then wm_exit[1] = "MonocoStation.FrozenHearts"
 
-                if last_entered ~= nil and string.find(k,last_entered) then 
-                    print(last_entered)
-                    TeleportPlayer(v[1].DestinationSpawnPointTag.TagName:ToString())
-                    print("COE33 WorldMapStuff - Tele to last entered portal: "..last_entered)
-                    wm_exit = nil
-                    goto break_loop
-                    
-                else
-                    if string.find(k,wm_exit[1]) and wm_exit[2] and (string.find(k,"Entry") ~= nil or string.find(k,"Entrance") ~= nil) then
+
+                end
+
+                for k,v in pairs(shuffled_portals) do
+
+                    if last_entered ~= nil and string.find(k,last_entered) then 
+                        print(last_entered)
                         TeleportPlayer(v[1].DestinationSpawnPointTag.TagName:ToString())
-                        print("COE33 WorldMapStuff - Tele to entrance: "..v[1].DestinationSpawnPointTag.TagName:ToString())
+                        print("COE33 WorldMapStuff - Tele to last entered portal: "..last_entered)
                         wm_exit = nil
-                        goto break_loop
-                    elseif string.find(k,wm_exit[1]) and not wm_exit[2] and (string.find(k,"Exit") ~= nil or string.find(k,"EndPath") ~= nil )then
-                        TeleportPlayer(v[1].DestinationSpawnPointTag.TagName:ToString())
-                        print("COE33 WorldMapStuff - Tele to exit: "..v[1].DestinationSpawnPointTag.TagName:ToString())
-                        wm_exit = nil
-                        goto break_loop
-                    
-                    elseif string.find(k,wm_exit[1]) and (string.find(k,"Forgotten") or string.find(k,"OldLumiere") or string.find(k,"FrozenHearts") )then
-                        print(k)
-                        TeleportPlayer(v[1].DestinationSpawnPointTag.TagName:ToString())
-                        print("COE33 WorldMapStuff - Tele to misc: "..v[1].DestinationSpawnPointTag.TagName:ToString())
-                        wm_exit = nil
-                        goto break_loop
-                    
+                        goto skip_loop
+                        
+                    else
+                        if string.find(k,wm_exit[1]) and wm_exit[2] and (string.find(k,"Entry") ~= nil or string.find(k,"Entrance") ~= nil) then
+                            TeleportPlayer(v[1].DestinationSpawnPointTag.TagName:ToString())
+                            print("COE33 WorldMapStuff - Tele to entrance: "..v[1].DestinationSpawnPointTag.TagName:ToString())
+                            wm_exit = nil
+                            goto skip_loop
+                        elseif string.find(k,wm_exit[1]) and not wm_exit[2] and (string.find(k,"Exit") ~= nil or string.find(k,"EndPath") ~= nil )then
+                            TeleportPlayer(v[1].DestinationSpawnPointTag.TagName:ToString())
+                            print("COE33 WorldMapStuff - Tele to exit: "..v[1].DestinationSpawnPointTag.TagName:ToString())
+                            wm_exit = nil
+                            goto skip_loop
+                        
+                        elseif string.find(k,wm_exit[1]) and (string.find(k,"Forgotten") or string.find(k,"OldLumiere") or string.find(k,"FrozenHearts") )then
+                            print(k)
+                            TeleportPlayer(v[1].DestinationSpawnPointTag.TagName:ToString())
+                            print("COE33 WorldMapStuff - Tele to misc: "..v[1].DestinationSpawnPointTag.TagName:ToString())
+                            wm_exit = nil
+                            goto skip_loop
+                        
+                        end
                     end
                 end
+                if wm_exit ~= nil then print("COE33 WorldMapStuff: Unknown Location Specified - "..wm_exit[1]) end
             end
-            if wm_exit ~= nil then print("COE33 WorldMapStuff: Unknown Location Specified - "..wm_exit[1]) end
-        end
-        ::break_loop::
-        already_shuffled = true
-    end)
-end
-
-function Register_SaveLastEnteredPortal()
-    RegisterHook("/Game/LevelTools/BP_jRPG_MapTeleportPoint.BP_jRPG_MapTeleportPoint_C:ProcessChangeMap", function (self)
-        local teleport_point_tag = self:get().DestinationSpawnPointTag.TagName:ToString()
-        local entry
-        if string.find(teleport_point_tag,"Entry") then entry = true
-        else entry = false
-        end
-        --print(entry)
-        
-        local area_name = string.gsub(string.gsub(string.gsub(teleport_point_tag,"Entry",""),"Exit",""), "Level.SpawnPoint.WorldMap.", "")
-        wm_exit = {area_name,entry}
-        --print(teleport_point_tag)
-
-        if not string.find(teleport_point_tag,"Generic.Return") and not string.find(teleport_point_tag,"WorldMap") then
-            last_entered = teleport_point_tag
-            already_shuffled = false
-        end
-        print(last_entered)
-
-
-    end)
-end
-
-
--- get shuffled portal_array
-function ShufflePortals(portals,shuffle_et,include_endgame_areas) 
-    --temporary vars
-
-    local portal_shuffle_seed
-
-    if portal_set_seed then
-        portal_shuffle_seed = portal_seed
-    else 
-        portal_shuffle_seed = math.random(999)
+            ::skip_loop::
+            already_shuffled = true
+        end)
     end
 
-    --in the actual thing maybe just read from save json or save the correspondence in the save json
-    math.randomseed(portal_shuffle_seed)
-
-    --[[
-    Tags are in format: Level.SpawnPoint.x.Entry/Exit
-    Except:
-    Old Lumiere's exit is .EndPath
-    Painting Workshop is .Path1/.Path2/.Path3
-    Monoco's Station has other names (see below)
-    The Monolith has 5 sections instead of 4 which is weird
-    Gestral Beaches have .Volleyball .WipeOut .OnlyUp .Race .Climb
-
-    Two Entrances
-    Flying Waters .Goblu
-    Ancient Sanctuary .AncientSanctuary
-    Yellow Harvest .YellowForest
-    Forgotten Battlefield .Forgotten Battlefield
-    Stone Wave Cliffs .SeaCliff
-    Old Lumiere .OldLumiere
-
-    Three Entrances
-    Monoco's Station .MonocoStation - .EntryForgotten is the actual entrance, .EntryFrozenHearts and .EntryOldLumiere can be considered exits
-    
-
-    Weird
-    Stone Wave Cliffs .SeaCliff
-    Old Lumiere .OldLumiere
-    Painting Workshop .CleaWorkshop
-
-    Optional
-    Endless Tower .CleasTower
-
-    Also Renoir's Drafts is .AxonPath for some reason
-    ]]
-
-    --theoretically we can also shuffle all entrances and exits seperately and there will still be a path through but i dunno how the logic is gonna work, i'll just
-    --replace entire areas for now, skipping monoco's station, spring meadows, painting workshop and gestral beaches
-
-    local one_entrance, one_entrance_copy, two_entrances = {},{},{}
-    local two_entrances_temp_tags = {}
-    local two_entrance_tags = {".Goblu",".AncientSanctuary",".YellowForest",".ForgottenBattlefield",".SeaCliff",".OldLumiere"}
-    local two_entrance_tags_copy = {".Goblu",".AncientSanctuary",".YellowForest",".ForgottenBattlefield",".SeaCliff",".OldLumiere"}
-    table.sort(two_entrance_tags)
-
-    for key,value in pairs(portals) do
-        for _, value2 in pairs(two_entrance_tags) do
-
-            if string.find(key,"MonocoStation") then break
-            elseif string.find(key,value2) ~= nil then
-                two_entrances[#two_entrances+1] = {key,value}
-
-                goto continue 
+    function Register_SaveLastEnteredPortal()
+        RegisterHook("/Game/LevelTools/BP_jRPG_MapTeleportPoint.BP_jRPG_MapTeleportPoint_C:ProcessChangeMap", function (self)
+            local teleport_point_tag = self:get().DestinationSpawnPointTag.TagName:ToString()
+            local entry
+            if string.find(teleport_point_tag,"Entry") then entry = true
+            else entry = false
             end
-        end
+            --print(entry)
+            
+            local area_name = string.gsub(string.gsub(string.gsub(teleport_point_tag,"Entry",""),"Exit",""), "Level.SpawnPoint.WorldMap.", "")
+            wm_exit = {area_name,entry}
+            --print(teleport_point_tag)
 
-        if string.find(key,"MonocoStation") or (string.find(key,"CleasTower") and not shuffle_et) or string.find(key,"SpringMeadows")  or (string.find(key,"CleaWorkshop") and not shuffle_workshop) or (string.find(key,"GestralBeach") and not shuffle_beaches) or string.find(key,"Verso") or string.find(key,"AxonPath") then
-            goto continue
+            if not string.find(teleport_point_tag,"Generic.Return") and not string.find(teleport_point_tag,"WorldMap") then
+                last_entered = teleport_point_tag
+                already_shuffled = false
+            end
+            print(last_entered)
+
+
+        end)
+    end
+
+
+    -- get shuffled portal_array
+    function ShufflePortals(portals,shuffle_et,include_endgame_areas) 
+        --temporary vars
+
+        local portal_shuffle_seed
+
+        if portal_set_seed then
+            portal_shuffle_seed = portal_seed
         else 
-            one_entrance[#one_entrance+1] = {key,value}
-            one_entrance_copy[#one_entrance_copy+1] = {key,value}
+            portal_shuffle_seed = math.random(999)
         end
 
-        ::continue::
-    end
+        --in the actual thing maybe just read from save json or save the correspondence in the save json
+        math.randomseed(portal_shuffle_seed)
 
+        --[[
+        Tags are in format: Level.SpawnPoint.x.Entry/Exit
+        Except:
+        Old Lumiere's exit is .EndPath
+        Painting Workshop is .Path1/.Path2/.Path3
+        Monoco's Station has other names (see below)
+        The Monolith has 5 sections instead of 4 which is weird
+        Gestral Beaches have .Volleyball .WipeOut .OnlyUp .Race .Climb
 
-    local one_entrance_out,two_entrances_out = {},{}
-    local n = #one_entrance
-    --shuffle one entrance maps    table format: n | {dest_tag, {portal, portal_transform}}
-    while #one_entrance_out < n do
-        local j = math.random(#one_entrance)
-        table.insert(one_entrance_out,one_entrance[j])
-        table.remove(one_entrance,j)
-    end
-    for i = 1, #one_entrance_copy, 1 do
-        one_entrance_out[i] = {one_entrance_out[i][1],one_entrance_copy[i][2]}
-        --print(one_entrance_out[i][1])
-    end
+        Two Entrances
+        Flying Waters .Goblu
+        Ancient Sanctuary .AncientSanctuary
+        Yellow Harvest .YellowForest
+        Forgotten Battlefield .Forgotten Battlefield
+        Stone Wave Cliffs .SeaCliff
+        Old Lumiere .OldLumiere
 
-    --shuffle two entrance maps    table format: n | short_tag
+        Three Entrances
+        Monoco's Station .MonocoStation - .EntryForgotten is the actual entrance, .EntryFrozenHearts and .EntryOldLumiere can be considered exits
+        
 
-    n = #two_entrance_tags
-    while #two_entrances_temp_tags < n do
-        local j = math.random(#two_entrance_tags)
-        table.insert(two_entrances_temp_tags,two_entrance_tags[j])
-        table.remove(two_entrance_tags,j)
-    end
-    
-    --table format: n | {shuffled_short_tag, short_tag}
-    for i = 1, #two_entrance_tags_copy, 1 do
-        two_entrances_temp_tags[i] = {two_entrances_temp_tags[i],two_entrance_tags_copy[i]}
-    end
+        Weird
+        Stone Wave Cliffs .SeaCliff
+        Old Lumiere .OldLumiere
+        Painting Workshop .CleaWorkshop
 
-    --swap corresponding entrance/exit pairs
+        Optional
+        Endless Tower .CleasTower
 
-    for i = 1, #two_entrances_temp_tags, 1 do
-        local shuffled_tag = two_entrances_temp_tags[i][1] --{shuffled_short_tag, short_tag}
-        local original_tag = two_entrances_temp_tags[i][2]
-        local shuffled_area_prefix = "Level.SpawnPoint" .. shuffled_tag
+        Also Renoir's Drafts is .AxonPath for some reason
+        ]]
 
+        --theoretically we can also shuffle all entrances and exits seperately and there will still be a path through but i dunno how the logic is gonna work, i'll just
+        --replace entire areas for now, skipping monoco's station, spring meadows, painting workshop and gestral beaches
 
+        local one_entrance, one_entrance_copy, two_entrances = {},{},{}
+        local two_entrances_temp_tags = {}
+        local two_entrance_tags = {".Goblu",".AncientSanctuary",".YellowForest",".ForgottenBattlefield",".SeaCliff",".OldLumiere"}
+        local two_entrance_tags_copy = {".Goblu",".AncientSanctuary",".YellowForest",".ForgottenBattlefield",".SeaCliff",".OldLumiere"}
+        table.sort(two_entrance_tags)
 
+        for key,value in pairs(portals) do
+            for _, value2 in pairs(two_entrance_tags) do
 
+                if string.find(key,"MonocoStation") then break
+                elseif string.find(key,value2) ~= nil then
+                    two_entrances[#two_entrances+1] = {key,value}
 
-        for j = 1, #two_entrances, 1 do
-            
-            
-            local orig_portal = two_entrances[j]-- {dest_tag, {portal, portal_loc, portal_rot}}
-
-    
-            local suffix
-
-            if string.find(orig_portal[1],original_tag) == nil then
-                goto continue
-            end 
-
-            if string.find(orig_portal[1],".Entry") then
-                suffix = ".Entry"
-            elseif string.find(shuffled_area_prefix,".OldLumiere") then
-                suffix = ".EndPath"
-            else
-                suffix = ".Exit"
+                    goto continue 
+                end
             end
 
-
-            two_entrances_out[#two_entrances_out+1] = {shuffled_area_prefix..suffix,orig_portal[2]}
-            --print(original_tag .. " to " .. shuffled_area_prefix)
-
-            
-
+            if string.find(key,"MonocoStation") or (string.find(key,"CleasTower") and not shuffle_et) or string.find(key,"SpringMeadows")  or (string.find(key,"CleaWorkshop") and not shuffle_workshop) or (string.find(key,"GestralBeach") and not shuffle_beaches) or string.find(key,"Verso") or string.find(key,"AxonPath") then
+                goto continue
+            else 
+                one_entrance[#one_entrance+1] = {key,value}
+                one_entrance_copy[#one_entrance_copy+1] = {key,value}
+            end
 
             ::continue::
         end
 
 
+        local one_entrance_out,two_entrances_out = {},{}
+        local n = #one_entrance
+        --shuffle one entrance maps    table format: n | {dest_tag, {portal, portal_transform}}
+        while #one_entrance_out < n do
+            local j = math.random(#one_entrance)
+            table.insert(one_entrance_out,one_entrance[j])
+            table.remove(one_entrance,j)
+        end
+        for i = 1, #one_entrance_copy, 1 do
+            one_entrance_out[i] = {one_entrance_out[i][1],one_entrance_copy[i][2]}
+            --print(one_entrance_out[i][1])
+        end
 
-    
-    end
-    
-    --combine the 2 tables to return
-    local output = {}
+        --shuffle two entrance maps    table format: n | short_tag
 
-    for k,v in pairs(two_entrances_out) do
-        output[v[1]] = v[2]
-    end
-    for k,v in pairs(one_entrance_out) do
-        output[v[1]] = v[2]
+        n = #two_entrance_tags
+        while #two_entrances_temp_tags < n do
+            local j = math.random(#two_entrance_tags)
+            table.insert(two_entrances_temp_tags,two_entrance_tags[j])
+            table.remove(two_entrance_tags,j)
+        end
+        
+        --table format: n | {shuffled_short_tag, short_tag}
+        for i = 1, #two_entrance_tags_copy, 1 do
+            two_entrances_temp_tags[i] = {two_entrances_temp_tags[i],two_entrance_tags_copy[i]}
+        end
+
+        --swap corresponding entrance/exit pairs
+
+        for i = 1, #two_entrances_temp_tags, 1 do
+            local shuffled_tag = two_entrances_temp_tags[i][1] --{shuffled_short_tag, short_tag}
+            local original_tag = two_entrances_temp_tags[i][2]
+            local shuffled_area_prefix = "Level.SpawnPoint" .. shuffled_tag
+
+
+
+
+
+            for j = 1, #two_entrances, 1 do
+                
+                
+                local orig_portal = two_entrances[j]-- {dest_tag, {portal, portal_loc, portal_rot}}
+
+        
+                local suffix
+
+                if string.find(orig_portal[1],original_tag) == nil then
+                    goto continue
+                end 
+
+                if string.find(orig_portal[1],".Entry") then
+                    suffix = ".Entry"
+                elseif string.find(shuffled_area_prefix,".OldLumiere") then
+                    suffix = ".EndPath"
+                else
+                    suffix = ".Exit"
+                end
+
+
+                two_entrances_out[#two_entrances_out+1] = {shuffled_area_prefix..suffix,orig_portal[2]}
+                --print(original_tag .. " to " .. shuffled_area_prefix)
+
+                
+
+
+                ::continue::
+            end
+
+
+
+        
+        end
+        
+        --combine the 2 tables to return
+        local output = {}
+
+        for k,v in pairs(two_entrances_out) do
+            output[v[1]] = v[2]
+        end
+        for k,v in pairs(one_entrance_out) do
+            output[v[1]] = v[2]
+        end
+
+        return output
     end
 
-    return output
+    --get tp to world map details
+    RegisterKeyBind(Key.F5, {ModifierKey.CONTROL}, function ()
+        local teleport_to = "Level.SpawnPoint.SpringMeadows.TreeExit"
+        TeleportPlayer(teleport_to)
+
+    end) 
+
+    function TeleportPlayer(destination)
+        local player_pawn = FindFirstOf("BP_jRPG_Character_World_C")
+
+        -- use portal destination tags as key
+        print("COE33 Portal - Warp To: ".. destination)
+        local teleport_loc = portal_transform_array[destination][2].Translation
+        if teleport_loc == nil then 
+            print("COE33 WorldMapStuff - Location doesn't exist!")
+            return 
+        end
+        --increase height so player doesn't clip into the map 
+        teleport_loc.Z = teleport_loc.Z + 2000
+
+        local teleport_rot = portal_transform_array[destination][3]
+        --adjust player position to be in front of portal
+
+        local xy_forward_vector = {
+            X=portal_transform_array[destination][1]:GetActorForwardVector().X,
+            Y=portal_transform_array[destination][1]:GetActorForwardVector().Y,
+        }
+        if string.find(last_entered,"CleaWorkshop") then
+            local scale_factor = 1500
+            teleport_loc.X = teleport_loc.X + xy_forward_vector.X * scale_factor
+            teleport_loc.Y = teleport_loc.Y + xy_forward_vector.Y * scale_factor
+        end
+
+        player_pawn:K2_SetActorLocationAndRotation(teleport_loc,teleport_rot,false,{},true)
+
+        --teleport_loc.Z = teleport_loc.Z - 9500
+        --player_pawn:K2_SetActorLocationAndRotation(teleport_loc,teleport_rot,false,{},false)
+    end
+
+
+    --teleport player
+    --just used to check area names and teleport function
+    --[[
+    RegisterKeyBind(Key.F6, {ModifierKey.CONTROL}, function ()
+
+        --todo:remove after testing
+        GetPortalLoop()
+        local destination = "Level.SpawnPoint.Goblu.Entry"
+        TeleportPlayer(destination)
+
+
+        
+        
+
+    end)
+
+    RegisterKeyBind(Key.F7,{ModifierKey.CONTROL}, function () 
+        local player_pawn = FindFirstOf("BP_jRPG_Character_World_C")
+        local adjust_loc = {
+            X = player_pawn:K2_GetActorLocation().X,
+            Y = player_pawn:K2_GetActorLocation().Y +100000,
+            Z = player_pawn:K2_GetActorLocation().Z + 100000
+        }
+
+        player_pawn:K2_SetActorLocation(adjust_loc,false,{},true)
+
+    end)
+    ]]
+
+    RegisterHook("/Game/UI/Widgets/HUD_Exploration/WorldMap/WBP_LevelNameWidget.WBP_LevelNameWidget_C:PlayAppearAnimation", function(self)
+        local level_text = self:get() ---@type WBP_LevelNameWidget_C
+
+        local possible_text = {"GOOD\nLUCK","WHO\nKNOWS","UNKNOWN\nAREA","LITERALLY\nJUST 33 SIMONS","According to all known laws of aviation, there is no way a bee should be able to fly.","hi\ndemorck","the game\nawards 2025","???"}
+
+        if random_names then
+            level_text:SetLevelNameText(FText(possible_text[math.random(#possible_text)]))
+
+        end
+
+    end)
 end
-
---get tp to world map details
-RegisterKeyBind(Key.F5, {ModifierKey.CONTROL}, function ()
-    local teleport_to = "Level.SpawnPoint.SpringMeadows.TreeExit"
-    TeleportPlayer(teleport_to)
-
-end) 
-
-function TeleportPlayer(destination)
-    local player_pawn = FindFirstOf("BP_jRPG_Character_World_C")
-
-    -- use portal destination tags as key
-    print("COE33 Portal - Warp To: ".. destination)
-    local teleport_loc = portal_transform_array[destination][2].Translation
-    if teleport_loc == nil then 
-        print("COE33 WorldMapStuff - Location doesn't exist!")
-        return 
-    end
-    --increase height so player doesn't clip into the map 
-    teleport_loc.Z = teleport_loc.Z + 2000
-
-    local teleport_rot = portal_transform_array[destination][3]
-    --adjust player position to be in front of portal
-
-    local xy_forward_vector = {
-        X=portal_transform_array[destination][1]:GetActorForwardVector().X,
-        Y=portal_transform_array[destination][1]:GetActorForwardVector().Y,
-    }
-    if string.find(last_entered,"CleaWorkshop") then
-        local scale_factor = 1500
-        teleport_loc.X = teleport_loc.X + xy_forward_vector.X * scale_factor
-        teleport_loc.Y = teleport_loc.Y + xy_forward_vector.Y * scale_factor
-    end
-
-    player_pawn:K2_SetActorLocationAndRotation(teleport_loc,teleport_rot,false,{},true)
-
-    --teleport_loc.Z = teleport_loc.Z - 9500
-    --player_pawn:K2_SetActorLocationAndRotation(teleport_loc,teleport_rot,false,{},false)
-end
-
-
---teleport player
---just used to check area names and teleport function
---[[
-RegisterKeyBind(Key.F6, {ModifierKey.CONTROL}, function ()
-
-    --todo:remove after testing
-    GetPortalLoop()
-    local destination = "Level.SpawnPoint.Goblu.Entry"
-    TeleportPlayer(destination)
-
-
-    
-    
-
-end)
-
-RegisterKeyBind(Key.F7,{ModifierKey.CONTROL}, function () 
-    local player_pawn = FindFirstOf("BP_jRPG_Character_World_C")
-    local adjust_loc = {
-        X = player_pawn:K2_GetActorLocation().X,
-        Y = player_pawn:K2_GetActorLocation().Y +100000,
-        Z = player_pawn:K2_GetActorLocation().Z + 100000
-    }
-
-    player_pawn:K2_SetActorLocation(adjust_loc,false,{},true)
-
-end)
-]]
-
-RegisterHook("/Game/UI/Widgets/HUD_Exploration/WorldMap/WBP_LevelNameWidget.WBP_LevelNameWidget_C:PlayAppearAnimation", function(self)
-    local level_text = self:get() ---@type WBP_LevelNameWidget_C
-
-    local possible_text = {"GOOD\nLUCK","WHO\nKNOWS","UNKNOWN\nAREA","LITERALLY\nJUST 33 SIMONS","According to all known laws of aviation, there is no way a bee should be able to fly.","hi\ndemorck","the game\nawards 2025","???"}
-
-    if random_names then
-        level_text:SetLevelNameText(FText(possible_text[math.random(#possible_text)]))
-
-    end
-
-end)
-

@@ -357,7 +357,9 @@
         "MM_Braseleur_NoFreeAim",
         "ML_CultistMage_Gold",
         "SI_DarkBallet",
-        "CAMP_PunchingBall"
+        "CAMP_PunchingBall",
+        
+        "Petank_Orange"
     ],
 
     "cut content bosses" : [
@@ -445,18 +447,13 @@
         "Petank_Blue",
         "Petank_Green",
         "Petank_Yellow",
-        "Petank_Orange",
         "Petank_Red",
         "Petank_Violet"
         
     ],
 
     "adds" : [
-        "WM_PetankAlphaSummon_Blue",
-        "WM_PetankAlphaSummon_Green",
-        "WM_PetankAlphaSummon_Red",
-        "WM_PetankAlphaSummon_Violet",
-        "WM_PetankAlphaSummon_Yellow",
+
         "OL_MirrorRenoir_HealingSource",
         "PETANK_GaultA_Summon",
         "PETANK_Lancelier_Summon",
